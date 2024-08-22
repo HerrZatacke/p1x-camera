@@ -1,0 +1,23 @@
+.controls {
+  display: flex;
+  gap: 16px;
+  margin: 10px;
+
+  &__button {
+    border: 1px solid #000;
+    background-color: #fff;
+    padding: 10px 20px;
+    cursor: pointer;
+
+    &:disabled {
+      cursor: initial;
+      background-color: #555;
+    }
+  }
+
+  &__progress {
+    padding: 8px;
+    border: 1px solid #888;
+    background-color: #222;
+  }
+}

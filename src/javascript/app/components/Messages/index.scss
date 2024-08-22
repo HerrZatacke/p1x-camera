@@ -1,0 +1,32 @@
+.messages {
+  padding: 12px;
+  height: 800px;
+  overflow-y: scroll;
+
+  &__message {
+    display: block;
+    padding: 12px 16px;
+    margin: 8px 0;
+    background: #363636;
+    border-radius: 5px;
+    border-left-style: solid;
+    border-left-width: 6px;
+    border-left-color: #888;
+
+    &--error {
+      border-left-color: #af2c2c;
+    }
+
+    &--warning {
+      border-left-color: #c29837;
+    }
+
+    &--info {
+      border-left-color: #1930ab;
+    }
+
+    &--homing {
+      border-left-color: #199fab;
+    }
+  }
+}

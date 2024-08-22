@@ -1,0 +1,30 @@
+@import '~reset-css/sass/reset';
+
+body {
+  @include fontFamily;
+  font-size: 14px;
+
+  background: #000;
+  color: #ccc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+pre {
+  font-family: monospace;
+  padding: 2px;
+}
+
+canvas {
+  transform: scaleX(-1);
+}
+
+button {
+  @include fontFamily;
+  font-size: 14px;
+
+  background: none;
+  border: none;
+}
