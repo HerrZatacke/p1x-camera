@@ -83,10 +83,7 @@ export const useControls = (): UseControls => {
   };
 
   const ping = async () => {
-    setBusy(true);
-    // eslint-disable-next-line no-console
-    console.log(await sendMessage([P1XCommands.SILENT_PING]));
-    setBusy(false);
+    sendMessage([P1XCommands.SILENT_PING]);
   };
 
   const setSensitivity = async () => {

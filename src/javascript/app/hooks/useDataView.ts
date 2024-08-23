@@ -17,18 +17,29 @@ interface TargetSize {
 }
 
 export interface RGBChannels {
-  channelR?: ChannelGrid[],
-  channelG?: ChannelGrid[],
-  channelB?: ChannelGrid[],
+  channelR: ChannelGrid[][],
+  channelG: ChannelGrid[][],
+  channelB: ChannelGrid[][],
 }
 
-export interface UseDimensions {
+export interface UseDataView {
   targetSize: TargetSize,
   channelGridToImageData: (channelGrid: ChannelGrid[], color: string) => ImageData,
   rgbChannelGridsToImageData: (channels: RGBChannels) => ImageData,
 }
 
-export const useDimensions = (): UseDimensions => {
+const sumChannels = (channels: ChannelGrid[][]): ChannelGrid[] => {
+  if (!channels[0]) {
+    return [];
+  }
+
+  return channels[0].map(({ x, y }, index) => {
+    const value = channels.reduce((acc, channel) => (acc + channel[index].value), 0);
+    return { x, y, value };
+  });
+};
+
+export const useDataView = (): UseDataView => {
   const { targetSize } = useScannedDataStore();
 
   const getDimensions = (channelGrid: ChannelGrid[]): Dimensions => (
@@ -65,7 +76,15 @@ export const useDimensions = (): UseDimensions => {
 
       const compensateDarkEnd = true;
 
-      const sens = compensateDarkEnd ? dimensions.maxV - Math.max(dimensions.minV * 1.2) : dimensions.maxV;
+      const compMax = 1.1;
+      const compMin = 0.9;
+
+      // const compMax = 0.9;
+      // const compMin = 1.1;
+
+      const sens = compensateDarkEnd ?
+        (dimensions.maxV * compMax) - Math.max(dimensions.minV * compMin) :
+        dimensions.maxV * compMax;
       const v = compensateDarkEnd ? value - dimensions.minV : value;
 
       const imgDataOffset = (imgX * 4) + (imgY * 4 * width);
@@ -97,7 +116,7 @@ export const useDimensions = (): UseDimensions => {
     channelG,
     channelB,
   }: RGBChannels): ImageData => {
-    const dimensionChannel = channelR || channelG || channelB;
+    const dimensionChannel = channelR[0] || channelG[0] || channelB[0];
 
     if (!dimensionChannel) {
       return new ImageData(1, 1);
@@ -109,15 +128,15 @@ export const useDimensions = (): UseDimensions => {
     const imageData = new ImageData(width, height);
 
     if (channelR) {
-      writeChannel(channelR, imageData, 0, 255);
+      writeChannel(sumChannels(channelR), imageData, 0, 255);
     }
 
     if (channelG) {
-      writeChannel(channelG, imageData, 1, 255);
+      writeChannel(sumChannels(channelG), imageData, 1, 255);
     }
 
     if (channelB) {
-      writeChannel(channelB, imageData, 2, 255);
+      writeChannel(sumChannels(channelB), imageData, 2, 255);
     }
 
     return imageData;

@@ -25,14 +25,24 @@ export const useSendMessage = (): UseSendMessage => {
     ];
   };
 
-  const sendMessage = useCallback(async (message: number[]): Promise<P1XMessage | null> => {
+  const sendMessage = useCallback(async (message: number[]): Promise<P1XMessage | null> => new Promise((resolve) => {
     if (!activePort) {
-      return null;
+      resolve(null);
+      return;
     }
 
-    const deviceMessage = await activePort.send(new Uint8Array(message), true);
-    return deviceMessage?.message || null;
-  }, [activePort]);
+    const timer = window.setInterval(() => {
+      // eslint-disable-next-line no-console
+      console.log('pinging...');
+      activePort.send(new Uint8Array([P1XCommands.SILENT_PING]), false);
+    }, 10000);
+
+    (async () => {
+      const deviceMessage = await activePort.send(new Uint8Array(message), true);
+      window.clearInterval(timer);
+      resolve(deviceMessage?.message || null);
+    })();
+  }), [activePort]);
 
   return {
     getMoveToMessage,

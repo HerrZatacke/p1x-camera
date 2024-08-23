@@ -1,10 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import clsx from 'clsx';
 import DataViewChannel from '../DataViewChannel';
 import DataViewRGB from '../DataViewRGB';
 import type { ChannelGrid } from '../../stores/scannedDataStore';
 import useScannedDataStore from '../../stores/scannedDataStore';
 import { P1XChannel, p1xChannels } from '../../../types/P1X';
+import type { RGBChannels } from '../../hooks/useDataView';
 
 import './index.scss';
 
@@ -14,9 +15,9 @@ interface ChannelProps {
 }
 
 interface ActiveChannels {
-  r?: P1XChannel,
-  g?: P1XChannel,
-  b?: P1XChannel,
+  r: P1XChannel[],
+  g: P1XChannel[],
+  b: P1XChannel[],
 }
 
 const channelColors: Record<P1XChannel, string> = {
@@ -29,7 +30,7 @@ const channelColors: Record<P1XChannel, string> = {
   [P1XChannel.COLOR_630NM]: 'ff4f00',
   [P1XChannel.COLOR_680NM]: 'ff0000',
   [P1XChannel.CLEAR]: 'ffffff',
-  [P1XChannel.NIR]: 'ffffff',
+  [P1XChannel.NIR]: 'd9a4ba',
 };
 
 function DataView() {
@@ -43,65 +44,85 @@ function DataView() {
   ), [data]);
 
   const [activeChannels, setActiveChannels] = useState<ActiveChannels>({
-    r: P1XChannel.COLOR_680NM,
-    g: P1XChannel.COLOR_555NM,
-    b: P1XChannel.COLOR_445NM,
+    r: [
+      P1XChannel.COLOR_630NM,
+      P1XChannel.COLOR_680NM,
+    ],
+    g: [
+      P1XChannel.COLOR_515NM,
+      P1XChannel.COLOR_555NM,
+      P1XChannel.COLOR_590NM,
+    ],
+    b: [
+      P1XChannel.COLOR_415NM,
+      P1XChannel.COLOR_445NM,
+      P1XChannel.COLOR_480NM,
+    ],
   });
 
-  const rgbChannels = {
-    channelR: activeChannels.r ? data[activeChannels.r] : undefined,
-    channelG: activeChannels.g ? data[activeChannels.g] : undefined,
-    channelB: activeChannels.b ? data[activeChannels.b] : undefined,
+  const rgbChannels: RGBChannels = {
+    channelR: activeChannels.r.map((channelName): ChannelGrid[] => data[channelName] || []),
+    channelG: activeChannels.g.map((channelName): ChannelGrid[] => data[channelName] || []),
+    channelB: activeChannels.b.map((channelName): ChannelGrid[] => data[channelName] || []),
   };
+
+  const toggleChannel = useCallback((color: 'r'|'g'|'b', channel: P1XChannel) => {
+    setActiveChannels((ac) => {
+      const channels = ac[color];
+      const active = channels.includes(channel);
+
+      const newChannels = active ? channels.filter((c) => c !== channel) : [...channels, channel];
+
+      return ({
+        ...ac,
+        [color]: newChannels,
+      });
+    });
+  }, []);
 
   // <pre>{ JSON.stringify(activeChannels) }</pre>
   return (
-    <div className="data-view">
-      { grids.map(({ name, channelGrid }) => (
-        <div className="data-view__element" key={name}>
-          <DataViewChannel
-            name={name}
-            color={channelColors[name]}
-            channelGrid={channelGrid}
-          />
-          <div className="data-view__buttons">
-            <button
-              type="button"
-              className={clsx('data-view__button data-view__button--blue', {
-                'data-view__button--active': activeChannels.b === name,
-              })}
-              onClick={() => {
-                setActiveChannels((ac) => ({ ...ac, b: name }));
-              }}
+    <>
+      <div className="data-view">
+        { grids.map(({ name, channelGrid }) => (
+          <div className="data-view__element" key={name}>
+            <h3 className="data-view__title">{ name }</h3>
+            <DataViewChannel
+              name={name}
+              color={channelColors[name]}
+              channelGrid={channelGrid}
             />
-            <button
-              type="button"
-              className={clsx('data-view__button data-view__button--green', {
-                'data-view__button--active': activeChannels.g === name,
-              })}
-              onClick={() => {
-                setActiveChannels((ac) => ({ ...ac, g: name }));
-              }}
-            />
-            <button
-              type="button"
-              className={clsx('data-view__button data-view__button--red', {
-                'data-view__button--active': activeChannels.r === name,
-              })}
-              onClick={() => {
-                setActiveChannels((ac) => ({ ...ac, r: name }));
-              }}
-            />
-          </div>
+            <div className="data-view__buttons">
+              <button
+                type="button"
+                className={clsx('data-view__button data-view__button--blue', {
+                  'data-view__button--active': activeChannels.b.includes(name),
+                })}
+                onClick={() => toggleChannel('b', name)}
+              />
+              <button
+                type="button"
+                className={clsx('data-view__button data-view__button--green', {
+                  'data-view__button--active': activeChannels.g.includes(name),
+                })}
+                onClick={() => toggleChannel('g', name)}
+              />
+              <button
+                type="button"
+                className={clsx('data-view__button data-view__button--red', {
+                  'data-view__button--active': activeChannels.r.includes(name),
+                })}
+                onClick={() => toggleChannel('r', name)}
+              />
+            </div>
 
-        </div>
-      ))}
-      <div>
-        <DataViewRGB
-          channels={rgbChannels}
-        />
+          </div>
+        ))}
       </div>
-    </div>
+      <DataViewRGB
+        channels={rgbChannels}
+      />
+    </>
   );
 }
 

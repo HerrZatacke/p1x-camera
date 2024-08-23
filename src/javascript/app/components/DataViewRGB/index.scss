@@ -1,5 +1,11 @@
 .data-view-rgb {
+  --rgb-width: 0;
+  --rgb-height: 0;
+
   display: block;
   background-color: #444;
   image-rendering: pixelated;
+  margin: 40px;
+  width: calc(4 * var(--rgb-width));
+  height: calc(4 * var(--rgb-height));
 }

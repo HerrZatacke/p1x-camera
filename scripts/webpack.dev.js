@@ -14,7 +14,7 @@ const config = merge(common(), {
     static: {
       directory: path.join(process.cwd(), 'src', 'assets'),
     },
-    port: 3000,
+    port: 3001,
     host: '0.0.0.0',
     onBeforeSetupMiddleware: ({ app }) => setupServer(app),
   },

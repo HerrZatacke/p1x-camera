@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import type { ChannelGrid } from '../../stores/scannedDataStore';
-import { useDimensions } from '../../hooks/useDimensions';
+import { useDataView } from '../../hooks/useDataView';
 
 import './index.scss';
 
@@ -12,7 +12,7 @@ export interface Props {
 
 function DataViewChannel({ channelGrid, color, name }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { channelGridToImageData, targetSize } = useDimensions();
+  const { channelGridToImageData, targetSize } = useDataView();
 
   useEffect(() => {
     const context = canvasRef.current?.getContext('2d');

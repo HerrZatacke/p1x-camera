@@ -4,13 +4,24 @@
   gap: 10px;
 
   &__element {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 10px;
     flex: 80px 0 1;
     border: 1px solid #444;
     padding: 4px;
   }
 
+  &__title {
+    display: block;
+    padding: 4px;
+    text-align: center;
+  }
+
   &__buttons {
     display: flex;
+    align-self: stretch;
     justify-content: space-between;
     gap: 4px;
     padding-top: 4px;
