@@ -4,8 +4,8 @@ import type { P1XChannels, P1XDataMessage } from '../../types/P1X';
 import { P1XChannel, P1XCommands } from '../../types/P1X';
 import useScannedDataStore from '../stores/scannedDataStore';
 
-const STEP = 120;
-const CENTER_SIZE = 64;
+const STEP = 1300;
+const CENTER_SIZE = 16;
 
 interface Progress {
   startTime: number,
@@ -52,7 +52,7 @@ export const useScanData = (): UseScanData => {
   const [busy, setBusy] = useState<boolean>(false);
 
   const { sendMessage, getMoveToMessage } = useSendMessage();
-  const { addData, clearData, setTargetSize, data } = useScannedDataStore();
+  const { addData, clearData, setDimensions, data } = useScannedDataStore();
 
   const [progress, setProgress] = useState<Progress>({
     startTime: 0,
@@ -109,11 +109,12 @@ export const useScanData = (): UseScanData => {
 
     const width = Math.floor(maxX / STEP);
     const height = Math.floor(maxY / STEP);
-    const centerX = Math.floor(width / 2);
-    const centerY = Math.floor(height / 2);
+    // const centerX = Math.floor(width / 2);
+    // const centerY = Math.floor(height / 2);
 
     // Full image
-    // const coords = prepareCoords(0, 0, width, height);
+    let coords = prepareCoords(0, 0, width, height);
+    setDimensions(width, height);
 
     // Lower half
     // const coords = prepareCoords(0, centerY, width, height);
@@ -122,17 +123,17 @@ export const useScanData = (): UseScanData => {
     // const coords = prepareCoords(0, Math.floor(centerY * 1.5), width, height);
 
     // center only
-    const centerSize = CENTER_SIZE;
-    const startX = Math.max(centerX - centerSize, 0);
-    const startY = Math.max(centerY - centerSize, 0);
-    const endX = Math.min(centerX + centerSize, Math.floor(maxX / STEP));
-    const endY = Math.min(centerY + centerSize, Math.floor(maxY / STEP));
+    // const centerSize = CENTER_SIZE;
+    // const startX = Math.max(centerX - centerSize, 0);
+    // const startY = Math.max(centerY - centerSize, 0);
+    // const endX = Math.min(centerX + centerSize, Math.floor(maxX / STEP));
+    // const endY = Math.min(centerY + centerSize, Math.floor(maxY / STEP));
 
-    let coords = prepareCoords(startX, startY, endX, endY);
+    // let coords = prepareCoords(startX, startY, endX, endY);
 
     // console.log(startX, startY, endX, endY, Math.floor(maxX / STEP), Math.floor(maxY / STEP));
 
-    setTargetSize(centerSize * 2, centerSize * 2);
+    // setDimensions(centerSize * 2, centerSize * 2);
 
     if (append) {
       coords = coords.filter(({ x, y }) => (

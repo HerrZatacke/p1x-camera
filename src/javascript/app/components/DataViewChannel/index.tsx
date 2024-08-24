@@ -12,7 +12,7 @@ export interface Props {
 
 function DataViewChannel({ channelGrid, color, name }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { channelGridToImageData, targetSize } = useDataView();
+  const { channelGridToImageData, dimensions } = useDataView();
 
   useEffect(() => {
     const context = canvasRef.current?.getContext('2d');
@@ -23,12 +23,12 @@ function DataViewChannel({ channelGrid, color, name }: Props) {
 
     const imageData = channelGridToImageData(channelGrid, color);
 
-    canvasRef.current.width = targetSize.width;
-    canvasRef.current.height = targetSize.height;
+    canvasRef.current.width = dimensions.width;
+    canvasRef.current.height = dimensions.height;
 
     context.putImageData(imageData, 0, 0);
 
-  }, [color, canvasRef, channelGrid, targetSize, channelGridToImageData]);
+  }, [color, canvasRef, channelGrid, dimensions, channelGridToImageData]);
 
   return (
     <canvas className="data-view-channel" ref={canvasRef} title={name} />

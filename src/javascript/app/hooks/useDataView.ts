@@ -1,19 +1,14 @@
 import { useCallback } from 'react';
-import type { ChannelGrid } from '../stores/scannedDataStore';
+import type { ChannelGrid, Dimensions } from '../stores/scannedDataStore';
 import useScannedDataStore from '../stores/scannedDataStore';
 
-export interface Dimensions {
+export interface DimensionConstraints {
   minX: number,
   minY: number,
   maxX: number,
   maxY: number,
   maxV: number,
   minV: number,
-}
-
-interface TargetSize {
-  width: number,
-  height: number,
 }
 
 export interface RGBChannels {
@@ -23,7 +18,7 @@ export interface RGBChannels {
 }
 
 export interface UseDataView {
-  targetSize: TargetSize,
+  dimensions: Dimensions,
   channelGridToImageData: (channelGrid: ChannelGrid[], color: string) => ImageData,
   rgbChannelGridsToImageData: (channels: RGBChannels) => ImageData,
 }
@@ -40,10 +35,10 @@ const sumChannels = (channels: ChannelGrid[][]): ChannelGrid[] => {
 };
 
 export const useDataView = (): UseDataView => {
-  const { targetSize } = useScannedDataStore();
+  const { dimensions } = useScannedDataStore();
 
-  const getDimensions = (channelGrid: ChannelGrid[]): Dimensions => (
-    channelGrid.reduce((acc: Dimensions, { x, y, value }: ChannelGrid): Dimensions => ({
+  const getDimensions = (channelGrid: ChannelGrid[]): DimensionConstraints => (
+    channelGrid.reduce((acc: DimensionConstraints, { x, y, value }: ChannelGrid): DimensionConstraints => ({
       minX: Math.min(acc.minX, x),
       minY: Math.min(acc.minY, y),
       minV: Math.min(acc.minV, value),
@@ -146,7 +141,7 @@ export const useDataView = (): UseDataView => {
 
   return {
     channelGridToImageData,
-    targetSize,
+    dimensions,
     rgbChannelGridsToImageData,
   };
 };

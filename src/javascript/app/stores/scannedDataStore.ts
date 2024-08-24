@@ -9,24 +9,26 @@ export interface ChannelGrid {
   value: number,
 }
 
+export interface Dimensions {
+  width: number,
+  height: number,
+}
+
 export type ChannelData = Partial<Record<P1XChannel, ChannelGrid[]>>;
 
 export interface ScannedDataState {
   data: ChannelData,
-  targetSize: {
-    width: number,
-    height: number,
-  }
+  dimensions: Dimensions,
   clearData: () => void,
   addData: (x: number, y: number, message: P1XChannels) => void,
-  setTargetSize: (width: number, height: number) => void,
+  setDimensions: (width: number, height: number) => void,
 }
 
 const useScannedDataStore = create(
   persist<ScannedDataState>(
     (set, getState) => ({
       data: {},
-      targetSize: {
+      dimensions: {
         width: 0,
         height: 0,
       },
@@ -56,9 +58,9 @@ const useScannedDataStore = create(
 
         set({ data: newData });
       },
-      setTargetSize: (width: number, height: number) => {
+      setDimensions: (width: number, height: number) => {
         set({
-          targetSize: {
+          dimensions: {
             width,
             height,
           },
