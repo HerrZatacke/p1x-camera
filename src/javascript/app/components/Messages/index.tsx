@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useWebUSB } from '../WebUSBProvider';
 import type { P1XErrorMessage, P1XInfoMessage, P1XMessage, P1XWarningMessage, P1XHomingMessage } from '../../../types/P1X';
 import { P1XType } from '../../../types/P1X';
+import type { DeviceMessage } from '../../../tools/USBSerialPortEE';
 
 import './index.scss';
 
@@ -10,7 +11,15 @@ interface MessageProps {
   text: string,
 }
 
-const getMessageProps = (message: P1XMessage): MessageProps => {
+const getMessageProps = (dMessage: DeviceMessage<P1XMessage>): MessageProps => {
+  const { message } = dMessage;
+  if (!message || dMessage.error) {
+    return {
+      className: 'messages__message messages__message--error',
+      text: `${dMessage.error?.message || ''}\n${dMessage.rawMessage}`.trim(),
+    };
+  }
+
   switch (message.type) {
     case P1XType.ERROR:
       return {
@@ -57,9 +66,9 @@ function Messages() {
       </label>
       <ul className="messages">
         { messages
-          .filter(({ captured }) => !(captured && !showCaptured))
+          .filter(({ captured, message }) => !captured || showCaptured || message?.type === P1XType.ERROR)
           .map((msg) => {
-            const { className, text } = getMessageProps(msg.message);
+            const { className, text } = getMessageProps(msg);
 
             return (
               <li key={msg.messageTimestamp} className={className}>

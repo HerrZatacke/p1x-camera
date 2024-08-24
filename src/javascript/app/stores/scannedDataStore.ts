@@ -66,7 +66,7 @@ const useScannedDataStore = create(
       },
     }),
     {
-      name: 'p1x-scanned-3',
+      name: 'p1x-scanned',
       storage: createJSONStorage(() => localStorage),
     },
   ),

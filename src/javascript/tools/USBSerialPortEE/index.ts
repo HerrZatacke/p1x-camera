@@ -6,7 +6,9 @@
 export interface DeviceMessage<T> {
   deviceTimestamp: number,
   messageTimestamp: number,
-  message: T,
+  message: T | null,
+  error: Error | null,
+  rawMessage: string,
   captured: boolean,
 }
 
@@ -103,19 +105,30 @@ class USBSerialPortEE <T_Message> {
 
           const messages = messageBuffer.split('\n');
 
-          messageBuffer = messages.filter((message, index) => {
+          messageBuffer = messages.filter((rawMessage, index) => {
             // if it's the last message...
             if (index === messages.length - 1) {
               // ... and it contains text, it did not end with \r\n -> keep it.
-              return !!message;
+              return !!rawMessage;
             }
 
             const capture = this.captureQueue.pop();
 
+            let message = null;
+            let error = null;
+
+            try {
+              message = JSON.parse(rawMessage.trim());
+            } catch (parseError) {
+              error = parseError as Error;
+            }
+
             const deviceMessage: DeviceMessage<T_Message> = {
               deviceTimestamp: this.initialized,
               messageTimestamp: Date.now() + index,
-              message: JSON.parse(message.trim()),
+              message,
+              rawMessage,
+              error,
               captured: Boolean(capture),
             };
 

@@ -118,14 +118,16 @@ export const useDataView = (): UseDataView => {
   }: RGBChannels): ImageData => {
     const dimensionChannel = channelR[0] || channelG[0] || channelB[0];
 
-    if (!dimensionChannel) {
-      return new ImageData(1, 1);
-    }
-
     const dimensions = getDimensions(dimensionChannel);
     const width = dimensions.maxX - dimensions.minX + 1;
     const height = dimensions.maxY - dimensions.minY + 1;
-    const imageData = new ImageData(width, height);
+
+    let imageData;
+    try {
+      imageData = new ImageData(width, height);
+    } catch (error) {
+      return new ImageData(1, 1);
+    }
 
     if (channelR) {
       writeChannel(sumChannels(channelR), imageData, 0, 255);

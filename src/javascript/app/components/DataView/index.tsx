@@ -47,16 +47,16 @@ function DataView() {
     r: [
       P1XChannel.COLOR_630NM,
       P1XChannel.COLOR_680NM,
-    ],
-    g: [
-      P1XChannel.COLOR_515NM,
-      P1XChannel.COLOR_555NM,
       P1XChannel.COLOR_590NM,
     ],
+    g: [
+      P1XChannel.COLOR_555NM,
+      P1XChannel.COLOR_515NM,
+    ],
     b: [
-      P1XChannel.COLOR_415NM,
-      P1XChannel.COLOR_445NM,
       P1XChannel.COLOR_480NM,
+      P1XChannel.COLOR_445NM,
+      P1XChannel.COLOR_415NM,
     ],
   });
 
