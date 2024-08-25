@@ -66,18 +66,15 @@ function WebUSBProvider({ children }: PropsWithChildren) {
     ));
   }, [connectDevice, enabled]);
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  window.refreshPorts = refreshPorts;
-
   // Attach eventlistener for when devices are dis/connected
   useEffect(() => {
-    refreshPorts();
+    const timeout = window.setTimeout(refreshPorts, 100);
 
     navigator.usb.addEventListener('connect', refreshPorts);
     navigator.usb.addEventListener('disconnect', refreshPorts);
 
     return () => {
+      window.clearTimeout(timeout);
       navigator.usb.removeEventListener('connect', refreshPorts);
       navigator.usb.removeEventListener('disconnect', refreshPorts);
     };

@@ -43,9 +43,12 @@ class USBSerialPortEE <T_Message> {
     this.captureQueue = [];
   }
   async connect(globalCallback: MessageCallback<T_Message>) {
-    await this.device.open();
-
-    await this.device.selectConfiguration?.(1);
+    try {
+      await this.device.open();
+      await this.device.selectConfiguration?.(1);
+    } catch (error) {
+      return;
+    }
 
     const configurationInterfaces = this.device.configuration?.interfaces;
     if (!configurationInterfaces) {
