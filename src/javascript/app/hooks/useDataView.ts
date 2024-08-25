@@ -5,10 +5,10 @@ import useScannedDataStore from '../stores/scannedDataStore';
 export interface DimensionConstraints {
   minX: number,
   minY: number,
+  minV: number,
   maxX: number,
   maxY: number,
   maxV: number,
-  minV: number,
 }
 
 export interface RGBChannels {
@@ -37,7 +37,7 @@ const sumChannels = (channels: ChannelGrid[][]): ChannelGrid[] => {
 export const useDataView = (): UseDataView => {
   const { dimensions } = useScannedDataStore();
 
-  const getDimensions = (channelGrid: ChannelGrid[]): DimensionConstraints => (
+  const getDimensionConstraints = (channelGrid: ChannelGrid[]): DimensionConstraints => (
     channelGrid.reduce((acc: DimensionConstraints, { x, y, value }: ChannelGrid): DimensionConstraints => ({
       minX: Math.min(acc.minX, x),
       minY: Math.min(acc.minY, y),
@@ -61,13 +61,13 @@ export const useDataView = (): UseDataView => {
     offset: 0|1|2,
     intensity: number,
   ) => {
-    const dimensions = getDimensions(channelGrid);
-    const width = dimensions.maxX - dimensions.minX + 1;
+    const dimensionConstraints = getDimensionConstraints(channelGrid);
+    const width = dimensionConstraints.maxX - dimensionConstraints.minX + 1;
     const { data } = imageData;
 
     channelGrid.forEach(({ x, y, value }) => {
-      const imgX = x - dimensions.minX;
-      const imgY = y - dimensions.minY;
+      const imgX = x - dimensionConstraints.minX;
+      const imgY = y - dimensionConstraints.minY;
 
       const compensateDarkEnd = true;
 
@@ -78,9 +78,9 @@ export const useDataView = (): UseDataView => {
       // const compMin = 1.1;
 
       const sens = compensateDarkEnd ?
-        (dimensions.maxV * compMax) - Math.max(dimensions.minV * compMin) :
-        dimensions.maxV * compMax;
-      const v = compensateDarkEnd ? value - dimensions.minV : value;
+        (dimensionConstraints.maxV * compMax) - Math.max(dimensionConstraints.minV * compMin) :
+        dimensionConstraints.maxV * compMax;
+      const v = compensateDarkEnd ? value - dimensionConstraints.minV : value;
 
       const imgDataOffset = (imgX * 4) + (imgY * 4 * width);
       data[imgDataOffset + offset] = Math.min(255, Math.floor(v * intensity / sens));
@@ -89,14 +89,17 @@ export const useDataView = (): UseDataView => {
 
   }, []);
 
-  const channelGridToImageData = useCallback((channelGrid: ChannelGrid[], color: string): ImageData => {
+  const channelGridToImageData = useCallback((
+    channelGrid: ChannelGrid[],
+    color: string,
+  ): ImageData => {
     const colorR = parseInt(color.substring(0, 2), 16);
     const colorG = parseInt(color.substring(2, 4), 16);
     const colorB = parseInt(color.substring(4, 6), 16);
 
-    const dimensions = getDimensions(channelGrid);
-    const width = dimensions.maxX - dimensions.minX + 1;
-    const height = dimensions.maxY - dimensions.minY + 1;
+    const dimensionConstraints = getDimensionConstraints(channelGrid);
+    const width = dimensionConstraints.maxX - dimensionConstraints.minX + 1;
+    const height = dimensionConstraints.maxY - dimensionConstraints.minY + 1;
     const imageData = new ImageData(width, height);
 
     writeChannel(channelGrid, imageData, 0, colorR);
@@ -111,11 +114,11 @@ export const useDataView = (): UseDataView => {
     channelG,
     channelB,
   }: RGBChannels): ImageData => {
-    const dimensionChannel = channelR[0] || channelG[0] || channelB[0];
+    const dimensionChannel = channelR[0] || channelG[0] || channelB[0] || [];
 
-    const dimensions = getDimensions(dimensionChannel);
-    const width = dimensions.maxX - dimensions.minX + 1;
-    const height = dimensions.maxY - dimensions.minY + 1;
+    const dimensionConstraints = getDimensionConstraints(dimensionChannel);
+    const width = dimensionConstraints.maxX - dimensionConstraints.minX + 1;
+    const height = dimensionConstraints.maxY - dimensionConstraints.minY + 1;
 
     let imageData;
     try {
