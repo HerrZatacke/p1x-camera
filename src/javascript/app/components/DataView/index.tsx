@@ -2,7 +2,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import clsx from 'clsx';
 import DataViewChannel from '../DataViewChannel';
 import DataViewRGB from '../DataViewRGB';
-import type { ChannelGrid } from '../../stores/scannedDataStore';
 import useScannedDataStore from '../../stores/scannedDataStore';
 import { P1XChannel, p1xChannels } from '../../../types/P1X';
 import type { RGBChannels } from '../../hooks/useDataView';
@@ -11,7 +10,7 @@ import './index.scss';
 
 interface ChannelProps {
   name: P1XChannel,
-  channelGrid: ChannelGrid[],
+  channelData: number[],
 }
 
 interface ActiveChannels {
@@ -34,12 +33,12 @@ const channelColors: Record<P1XChannel, string> = {
 };
 
 function DataView() {
-  const { data } = useScannedDataStore();
+  const { data, dimensions } = useScannedDataStore();
 
-  const grids = useMemo<ChannelProps[]>(() => (
+  const channelsData = useMemo<ChannelProps[]>(() => (
     p1xChannels.reduce((acc: ChannelProps[], name): ChannelProps[] => {
-      const channelGrid = data[name];
-      return channelGrid ? [...acc, { name, channelGrid }] : acc;
+      const channelData = data[name];
+      return channelData ? [...acc, { name, channelData }] : acc;
     }, [])
   ), [data]);
 
@@ -61,9 +60,9 @@ function DataView() {
   });
 
   const rgbChannels: RGBChannels = {
-    channelR: activeChannels.r.map((channelName): ChannelGrid[] => data[channelName] || []),
-    channelG: activeChannels.g.map((channelName): ChannelGrid[] => data[channelName] || []),
-    channelB: activeChannels.b.map((channelName): ChannelGrid[] => data[channelName] || []),
+    channelR: activeChannels.r.map((channelName): number[] => data[channelName] || []),
+    channelG: activeChannels.g.map((channelName): number[] => data[channelName] || []),
+    channelB: activeChannels.b.map((channelName): number[] => data[channelName] || []),
   };
 
   const toggleChannel = useCallback((color: 'r'|'g'|'b', channel: P1XChannel) => {
@@ -80,17 +79,17 @@ function DataView() {
     });
   }, []);
 
-  // <pre>{ JSON.stringify(activeChannels) }</pre>
   return (
     <>
       <div className="data-view">
-        { grids.map(({ name, channelGrid }) => (
+        { channelsData.map(({ name, channelData }) => (
           <div className="data-view__element" key={name}>
             <h3 className="data-view__title">{ name }</h3>
             <DataViewChannel
               name={name}
+              dimensions={dimensions}
               color={channelColors[name]}
-              channelGrid={channelGrid}
+              channelData={channelData}
             />
             <div className="data-view__buttons">
               <button
@@ -121,6 +120,7 @@ function DataView() {
       </div>
       <DataViewRGB
         channels={rgbChannels}
+        dimensions={dimensions}
       />
     </>
   );

@@ -1,18 +1,19 @@
 import React, { useEffect, useRef } from 'react';
-import type { ChannelGrid } from '../../stores/scannedDataStore';
 import { useDataView } from '../../hooks/useDataView';
+import type { Dimensions } from '../../stores/scannedDataStore';
 
 import './index.scss';
 
 export interface Props {
-  channelGrid: ChannelGrid[],
+  channelData: number[],
+  dimensions: Dimensions,
   color: string,
   name: string,
 }
 
-function DataViewChannel({ channelGrid, color, name }: Props) {
+function DataViewChannel({ channelData, dimensions, color, name }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { channelGridToImageData, dimensions } = useDataView();
+  const { channelDataToImageData } = useDataView(dimensions);
 
   useEffect(() => {
     const context = canvasRef.current?.getContext('2d');
@@ -21,14 +22,14 @@ function DataViewChannel({ channelGrid, color, name }: Props) {
       return;
     }
 
-    const imageData = channelGridToImageData(channelGrid, color);
+    const imageData = channelDataToImageData(channelData, color);
 
     canvasRef.current.width = dimensions.width;
     canvasRef.current.height = dimensions.height;
 
     context.putImageData(imageData, 0, 0);
 
-  }, [color, canvasRef, channelGrid, dimensions, channelGridToImageData]);
+  }, [color, canvasRef, channelData, dimensions, channelDataToImageData]);
 
   return (
     <canvas className="data-view-channel" ref={canvasRef} title={name} />

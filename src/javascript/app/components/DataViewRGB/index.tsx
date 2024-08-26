@@ -1,18 +1,20 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import type { CSSPropertiesVars } from 'react';
 import type { RGBChannels } from '../../hooks/useDataView';
+import type { Dimensions } from '../../stores/scannedDataStore';
 import { useDataView } from '../../hooks/useDataView';
 
 import './index.scss';
 
 export interface Props {
   channels: RGBChannels,
+  dimensions: Dimensions,
 }
 
-function DataViewRGB({ channels }: Props) {
+function DataViewRGB({ channels, dimensions }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const { rgbChannelGridsToImageData, dimensions } = useDataView();
+  const { rgbChannelsDataToImageData } = useDataView(dimensions);
 
   const sliderStyles = useMemo<CSSPropertiesVars>(() => ({
     '--rgb-width': `${dimensions.width}px`,
@@ -26,14 +28,14 @@ function DataViewRGB({ channels }: Props) {
       return;
     }
 
-    const imageData = rgbChannelGridsToImageData(channels);
+    const imageData = rgbChannelsDataToImageData(channels);
 
     canvasRef.current.width = dimensions.width;
     canvasRef.current.height = dimensions.height;
 
     context.putImageData(imageData, 0, 0);
 
-  }, [canvasRef, dimensions, rgbChannelGridsToImageData, channels]);
+  }, [canvasRef, dimensions, rgbChannelsDataToImageData, channels]);
 
   return (
     <canvas

@@ -4,6 +4,7 @@ import type { P1XChannels, P1XDataMessage } from '../../types/P1X';
 import { P1XChannel, P1XCommands } from '../../types/P1X';
 import useScannedDataStore from '../stores/scannedDataStore';
 import useSettingsStore from '../stores/settingsStore';
+import { getIndexFromCoordinates } from '../../tools/dimensions';
 
 export interface Progress {
   startTime: number,
@@ -101,27 +102,31 @@ export const useScanData = (): UseScanData => {
       clearData();
     }
 
-    // const message = await sendMessage([P1XCommands.READ_DATA]);
-    //
-    // if (!message) {
-    //   return;
-    // }
-    //
-    // const { maxX, maxY } = (message as P1XDataMessage);
-
     const width = scanConstraints.maxX - scanConstraints.minX;
     const height = scanConstraints.maxY - scanConstraints.minY;
 
     // Full image
-    let coords = prepareCoords(scanConstraints.minX, scanConstraints.minY, scanConstraints.maxX, scanConstraints.maxY);
+    let coords = prepareCoords(
+      scanConstraints.minX,
+      scanConstraints.minY,
+      scanConstraints.maxX,
+      scanConstraints.maxY,
+    );
     setDimensions(width, height);
 
     if (append) {
-      coords = coords.filter(({ x, y }) => (
-        !data[P1XChannel.CLEAR]?.find((existing) => (
-          x === existing.x && y === existing.y
-        ))
-      ));
+      coords = coords.filter(({ x, y }) => {
+        const index = getIndexFromCoordinates(
+          x - scanConstraints.minX,
+          y - scanConstraints.minY,
+          { width, height },
+        );
+
+        return (
+          (data[P1XChannel.CLEAR]?.[index] === -1) ||
+          (data[P1XChannel.CLEAR]?.[index] === undefined)
+        );
+      });
     }
 
     if (!coords.length) {
@@ -157,7 +162,11 @@ export const useScanData = (): UseScanData => {
       const result = await sendMessage([P1XCommands.READ_DATA], true);
 
       if (result) {
-        addData(nextCoords.x, nextCoords.y, result as P1XDataMessage as P1XChannels);
+        addData(
+          nextCoords.x - scanConstraints.minX,
+          nextCoords.y - scanConstraints.minY,
+          result as P1XDataMessage as P1XChannels,
+        );
       }
 
       updateProgress(coords.length);

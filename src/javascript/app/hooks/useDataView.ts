@@ -1,73 +1,55 @@
 import { useCallback } from 'react';
-import type { ChannelGrid, Dimensions } from '../stores/scannedDataStore';
-import useScannedDataStore from '../stores/scannedDataStore';
+import type { Dimensions } from '../stores/scannedDataStore';
+import { getCoordinatesFromIndex } from '../../tools/dimensions';
 
-export interface DimensionConstraints {
-  minX: number,
-  minY: number,
-  minV: number,
-  maxX: number,
-  maxY: number,
-  maxV: number,
+export interface MinMax {
+  min: number,
+  max: number,
 }
 
 export interface RGBChannels {
-  channelR: ChannelGrid[][],
-  channelG: ChannelGrid[][],
-  channelB: ChannelGrid[][],
+  channelR: number[][],
+  channelG: number[][],
+  channelB: number[][],
 }
 
 export interface UseDataView {
-  dimensions: Dimensions,
-  channelGridToImageData: (channelGrid: ChannelGrid[], color: string) => ImageData,
-  rgbChannelGridsToImageData: (channels: RGBChannels) => ImageData,
+  channelDataToImageData: (channelData: number[], color: string) => ImageData,
+  rgbChannelsDataToImageData: (channels: RGBChannels) => ImageData,
 }
 
-const sumChannels = (channels: ChannelGrid[][]): ChannelGrid[] => {
-  if (!channels[0]) {
-    return [];
-  }
+export const useDataView = (dimensions: Dimensions): UseDataView => {
 
-  return channels[0].map(({ x, y }, index) => {
-    const value = channels.reduce((acc, channel) => (acc + channel[index].value), 0);
-    return { x, y, value };
-  });
-};
+  const sumChannels = (channels: number[][]): number[] => {
+    if (!channels.length) {
+      return [];
+    }
 
-export const useDataView = (): UseDataView => {
-  const { dimensions } = useScannedDataStore();
-
-  const getDimensionConstraints = (channelGrid: ChannelGrid[]): DimensionConstraints => (
-    channelGrid.reduce((acc: DimensionConstraints, { x, y, value }: ChannelGrid): DimensionConstraints => ({
-      minX: Math.min(acc.minX, x),
-      minY: Math.min(acc.minY, y),
-      minV: Math.min(acc.minV, value),
-      maxX: Math.max(acc.maxX, x),
-      maxY: Math.max(acc.maxY, y),
-      maxV: Math.max(acc.maxV, value),
-    }), {
-      minX: Infinity,
-      minY: Infinity,
-      minV: Infinity,
-      maxX: 0,
-      maxY: 0,
-      maxV: 0,
-    })
-  );
+    return channels[0].map((_, index) => (
+      channels.reduce((acc, channel) => (acc + channel[index]), 0)
+    ));
+  };
 
   const writeChannel = useCallback((
-    channelGrid: ChannelGrid[],
+    channelData: number[],
     imageData: ImageData,
     offset: 0|1|2,
     intensity: number,
   ) => {
-    const dimensionConstraints = getDimensionConstraints(channelGrid);
-    const width = dimensionConstraints.maxX - dimensionConstraints.minX + 1;
+    const width = dimensions.width;
     const { data } = imageData;
 
-    channelGrid.forEach(({ x, y, value }) => {
-      const imgX = x - dimensionConstraints.minX;
-      const imgY = y - dimensionConstraints.minY;
+    const minMax: MinMax = channelData.reduce((acc: MinMax, value: number): MinMax => ({
+      min: Math.min(acc.min, value),
+      max: Math.max(acc.max, value),
+    }), { min: 65536, max: 0 });
+
+    channelData.forEach((value, index) => {
+      if (value < 0) {
+        return;
+      }
+
+      const { x, y } = getCoordinatesFromIndex(index, dimensions);
 
       const compensateDarkEnd = true;
 
@@ -78,47 +60,41 @@ export const useDataView = (): UseDataView => {
       // const compMin = 1.1;
 
       const sens = compensateDarkEnd ?
-        (dimensionConstraints.maxV * compMax) - Math.max(dimensionConstraints.minV * compMin) :
-        dimensionConstraints.maxV * compMax;
-      const v = compensateDarkEnd ? value - dimensionConstraints.minV : value;
+        (minMax.max * compMax) - Math.max(minMax.min * compMin) :
+        minMax.max * compMax;
+      const v = compensateDarkEnd ? value - minMax.min : value;
 
-      const imgDataOffset = (imgX * 4) + (imgY * 4 * width);
+      const imgDataOffset = (x * 4) + (y * 4 * width);
       data[imgDataOffset + offset] = Math.min(255, Math.floor(v * intensity / sens));
       data[imgDataOffset + 3] = 255;
     });
 
-  }, []);
+  }, [dimensions]);
 
-  const channelGridToImageData = useCallback((
-    channelGrid: ChannelGrid[],
+  const channelDataToImageData = useCallback((
+    channelData: number[],
     color: string,
   ): ImageData => {
     const colorR = parseInt(color.substring(0, 2), 16);
     const colorG = parseInt(color.substring(2, 4), 16);
     const colorB = parseInt(color.substring(4, 6), 16);
 
-    const dimensionConstraints = getDimensionConstraints(channelGrid);
-    const width = dimensionConstraints.maxX - dimensionConstraints.minX + 1;
-    const height = dimensionConstraints.maxY - dimensionConstraints.minY + 1;
-    const imageData = new ImageData(width, height);
+    const imageData = new ImageData(dimensions.width, dimensions.height);
 
-    writeChannel(channelGrid, imageData, 0, colorR);
-    writeChannel(channelGrid, imageData, 1, colorG);
-    writeChannel(channelGrid, imageData, 2, colorB);
+    writeChannel(channelData, imageData, 0, colorR);
+    writeChannel(channelData, imageData, 1, colorG);
+    writeChannel(channelData, imageData, 2, colorB);
 
     return imageData;
-  }, [writeChannel]);
+  }, [dimensions, writeChannel]);
 
-  const rgbChannelGridsToImageData = useCallback(({
+  const rgbChannelsDataToImageData = useCallback(({
     channelR,
     channelG,
     channelB,
   }: RGBChannels): ImageData => {
-    const dimensionChannel = channelR[0] || channelG[0] || channelB[0] || [];
-
-    const dimensionConstraints = getDimensionConstraints(dimensionChannel);
-    const width = dimensionConstraints.maxX - dimensionConstraints.minX + 1;
-    const height = dimensionConstraints.maxY - dimensionConstraints.minY + 1;
+    const width = dimensions.width;
+    const height = dimensions.height;
 
     let imageData;
     try {
@@ -140,11 +116,10 @@ export const useDataView = (): UseDataView => {
     }
 
     return imageData;
-  }, [writeChannel]);
+  }, [dimensions, writeChannel]);
 
   return {
-    channelGridToImageData,
-    dimensions,
-    rgbChannelGridsToImageData,
+    channelDataToImageData,
+    rgbChannelsDataToImageData,
   };
 };

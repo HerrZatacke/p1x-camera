@@ -2,19 +2,14 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import type { P1XChannel, P1XChannels } from '../../types/P1X';
 import { p1xChannels } from '../../types/P1X';
-
-export interface ChannelGrid {
-  x: number,
-  y: number,
-  value: number,
-}
+import { getIndexFromCoordinates } from '../../tools/dimensions';
 
 export interface Dimensions {
   width: number,
   height: number,
 }
 
-export type ChannelData = Partial<Record<P1XChannel, ChannelGrid[]>>;
+export type ChannelData = Partial<Record<P1XChannel, number[]>>;
 
 export interface ScannedDataState {
   data: ChannelData,
@@ -33,22 +28,16 @@ const useScannedDataStore = create(
         height: 0,
       },
       clearData: () => {
-        // return;
-        // noinspection UnreachableCodeJS
         set({ data: {} });
       },
       addData: (x: number, y: number, message: P1XChannels) => {
-        // return;
-        // noinspection UnreachableCodeJS
-        const { data } = getState();
+        const { data, dimensions } = getState();
+        const arraySize = dimensions.width * dimensions.height;
 
         const newData = p1xChannels.reduce((acc: ChannelData, channelKey: P1XChannel) => {
-          const channel: ChannelGrid[] = data[channelKey] || [];
-          channel.push({
-            x,
-            y,
-            value: message[channelKey],
-          });
+          const channel: number[] = data?.[channelKey] || Array(arraySize).fill(-1);
+          const index = getIndexFromCoordinates(x, y, dimensions);
+          channel[index] = message[channelKey];
 
           return {
             ...acc,
