@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import type { P1XDataMessage } from '../../../types/P1X';
 import { P1XCommands } from '../../../types/P1X';
 import { useSendMessage } from '../../hooks/useSendMessage';
-import type { Answers } from '../../stores/dialogStore';
 import useDialogStore from '../../stores/dialogStore';
+import useSettingsStore from '../../stores/settingsStore';
+import type { ScanConstraints } from '../../stores/settingsStore';
+import type { P1XDataMessage } from '../../../types/P1X';
+import type { Answers } from '../../stores/dialogStore';
 
 
 interface UseControls {
@@ -15,13 +17,15 @@ interface UseControls {
   ledOff: () => Promise<void>,
   center: () => Promise<void>,
   ping: () => Promise<void>,
-  setSensitivity: () => Promise<void>,
+  sensitivityDialog: () => Promise<void>,
+  dimensionsDialog: () => Promise<void>,
 }
 
 export const useControls = (): UseControls => {
   const [busy, setBusy] = useState<boolean>(false);
   const { sendMessage, getMoveToMessage } = useSendMessage();
-  const { setDialog } = useDialogStore();
+  const { setDialog, setShowDimensionsDialog } = useDialogStore();
+  const { setScanConstraints } = useSettingsStore();
 
   const getData = async () => {
     setBusy(true);
@@ -86,7 +90,7 @@ export const useControls = (): UseControls => {
     sendMessage([P1XCommands.SILENT_PING]);
   };
 
-  const setSensitivity = async () => {
+  const sensitivityDialog = async () => {
     setBusy(true);
     const { aGain, aTime, aStep } = (await sendMessage([P1XCommands.READ_DATA])) as P1XDataMessage;
 
@@ -142,6 +146,24 @@ export const useControls = (): UseControls => {
     });
   };
 
+  const dimensionsDialog = async () => {
+    setBusy(true);
+
+    const { maxX, maxY } = (await sendMessage([P1XCommands.READ_DATA])) as P1XDataMessage;
+
+    setShowDimensionsDialog({
+      maxX,
+      maxY,
+      callback: async (scanConstraints?: ScanConstraints) => {
+        if (scanConstraints) {
+          setScanConstraints(scanConstraints);
+        }
+
+        setBusy(false);
+      },
+    });
+  };
+
   const ledMax = async () => {
     setBusy(true);
     // eslint-disable-next-line no-console
@@ -172,6 +194,7 @@ export const useControls = (): UseControls => {
     ledOn,
     ledMax,
     ledOff,
-    setSensitivity,
+    sensitivityDialog,
+    dimensionsDialog,
   };
 };

@@ -3,11 +3,9 @@ import { useSendMessage } from './useSendMessage';
 import type { P1XChannels, P1XDataMessage } from '../../types/P1X';
 import { P1XChannel, P1XCommands } from '../../types/P1X';
 import useScannedDataStore from '../stores/scannedDataStore';
+import useSettingsStore from '../stores/settingsStore';
 
-const STEP = 1300;
-const CENTER_SIZE = 16;
-
-interface Progress {
+export interface Progress {
   startTime: number,
   totalSteps: number,
   elapsedSteps: number,
@@ -15,13 +13,16 @@ interface Progress {
   timeRemaining: number,
   timePerStep: number,
 }
-interface UseScanData {
+
+
+export interface UseScanData {
   busy: boolean,
   progress: Progress,
+  clearData: () => void,
   scanData: () => Promise<void>,
 }
 
-interface Point {
+export interface Point {
   x: number,
   y: number,
 }
@@ -53,6 +54,7 @@ export const useScanData = (): UseScanData => {
 
   const { sendMessage, getMoveToMessage } = useSendMessage();
   const { addData, clearData, setDimensions, data } = useScannedDataStore();
+  const { scanConstraints } = useSettingsStore();
 
   const [progress, setProgress] = useState<Progress>({
     startTime: 0,
@@ -99,41 +101,20 @@ export const useScanData = (): UseScanData => {
       clearData();
     }
 
-    const message = await sendMessage([P1XCommands.READ_DATA]);
+    // const message = await sendMessage([P1XCommands.READ_DATA]);
+    //
+    // if (!message) {
+    //   return;
+    // }
+    //
+    // const { maxX, maxY } = (message as P1XDataMessage);
 
-    if (!message) {
-      return;
-    }
-
-    const { maxX, maxY } = (message as P1XDataMessage);
-
-    const width = Math.floor(maxX / STEP);
-    const height = Math.floor(maxY / STEP);
-    // const centerX = Math.floor(width / 2);
-    // const centerY = Math.floor(height / 2);
+    const width = scanConstraints.maxX - scanConstraints.minX;
+    const height = scanConstraints.maxY - scanConstraints.minY;
 
     // Full image
-    let coords = prepareCoords(0, 0, width, height);
+    let coords = prepareCoords(scanConstraints.minX, scanConstraints.minY, scanConstraints.maxX, scanConstraints.maxY);
     setDimensions(width, height);
-
-    // Lower half
-    // const coords = prepareCoords(0, centerY, width, height);
-
-    // Lower 1/4
-    // const coords = prepareCoords(0, Math.floor(centerY * 1.5), width, height);
-
-    // center only
-    // const centerSize = CENTER_SIZE;
-    // const startX = Math.max(centerX - centerSize, 0);
-    // const startY = Math.max(centerY - centerSize, 0);
-    // const endX = Math.min(centerX + centerSize, Math.floor(maxX / STEP));
-    // const endY = Math.min(centerY + centerSize, Math.floor(maxY / STEP));
-
-    // let coords = prepareCoords(startX, startY, endX, endY);
-
-    // console.log(startX, startY, endX, endY, Math.floor(maxX / STEP), Math.floor(maxY / STEP));
-
-    // setDimensions(centerSize * 2, centerSize * 2);
 
     if (append) {
       coords = coords.filter(({ x, y }) => (
@@ -143,6 +124,11 @@ export const useScanData = (): UseScanData => {
       ));
     }
 
+    if (!coords.length) {
+      setBusy(false);
+      return;
+    }
+
     setProgress((p) => ({
       ...p,
       totalSteps: coords.length,
@@ -150,7 +136,7 @@ export const useScanData = (): UseScanData => {
     }));
 
     // Before scanning, travel to start point
-    await sendMessage(getMoveToMessage(coords[0].x * STEP, coords[0].y * STEP));
+    await sendMessage(getMoveToMessage(coords[0].x * scanConstraints.step, coords[0].y * scanConstraints.step));
 
 
     const aquireData = async (): Promise<void> => {
@@ -160,7 +146,7 @@ export const useScanData = (): UseScanData => {
         return;
       }
 
-      await sendMessage(getMoveToMessage(nextCoords.x * STEP, nextCoords.y * STEP));
+      await sendMessage(getMoveToMessage(nextCoords.x * scanConstraints.step, nextCoords.y * scanConstraints.step));
 
       const result = await sendMessage([P1XCommands.READ_DATA]);
 
@@ -185,6 +171,7 @@ export const useScanData = (): UseScanData => {
   return {
     progress,
     busy,
+    clearData,
     scanData,
   };
 };

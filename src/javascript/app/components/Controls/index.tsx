@@ -26,12 +26,14 @@ function Controls() {
     ledOn,
     ledMax,
     ledOff,
-    setSensitivity,
+    sensitivityDialog,
+    dimensionsDialog,
   } = useControls();
 
   const {
     busy: scanBusy,
     progress,
+    clearData,
     scanData,
   } = useScanData();
 
@@ -67,9 +69,36 @@ function Controls() {
                 className="controls__button"
                 disabled={disabled}
                 type="button"
+                onClick={dimensionsDialog}
+              >
+                Set Dimensions
+              </button>
+
+              <button
+                className="controls__button"
+                disabled={disabled}
+                type="button"
+                onClick={sensitivityDialog}
+              >
+                Set sensitivity
+              </button>
+
+              <button
+                className="controls__button"
+                disabled={disabled}
+                type="button"
                 onClick={scanData}
               >
                 Scan data
+              </button>
+
+              <button
+                className="controls__button"
+                disabled={disabled}
+                type="button"
+                onClick={clearData}
+              >
+                Clear data
               </button>
 
               <button
@@ -98,16 +127,6 @@ function Controls() {
               >
                 Ping
               </button>
-
-              <button
-                className="controls__button"
-                disabled={disabled}
-                type="button"
-                onClick={setSensitivity}
-              >
-                Set sensitivity
-              </button>
-
 
               <button
                 className="controls__button"
