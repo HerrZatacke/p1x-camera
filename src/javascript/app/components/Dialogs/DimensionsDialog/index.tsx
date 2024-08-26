@@ -66,11 +66,11 @@ function DimensionsDialog() {
       intMaxY,
     );
 
-    setStrStep(newStep.toString(10));
+    setStrStep(newStep.toString());
     setStrMinX('0');
-    setStrMaxX(rawWidth.toString(10));
+    setStrMaxX(rawWidth.toString());
     setStrMinY('0');
-    setStrMaxY(rawHeight.toString(10));
+    setStrMaxY(rawHeight.toString());
   };
 
   const setCenter = () => {
@@ -85,11 +85,11 @@ function DimensionsDialog() {
       intMaxY,
     );
 
-    setStrStep(newStep.toString(10));
-    setStrMinX(Math.floor(rawWidth * 0.33).toString(10));
-    setStrMaxX(Math.ceil(rawWidth * 0.66).toString(10));
-    setStrMinY(Math.floor(rawHeight * 0.33).toString(10));
-    setStrMaxY(Math.ceil(rawHeight * 0.66).toString(10));
+    setStrStep(newStep.toString());
+    setStrMinX(Math.floor(rawWidth * 0.33).toString());
+    setStrMaxX(Math.ceil(rawWidth * 0.66).toString());
+    setStrMinY(Math.floor(rawHeight * 0.33).toString());
+    setStrMaxY(Math.ceil(rawHeight * 0.66).toString());
   };
 
   const setFullImage = () => {
@@ -104,11 +104,11 @@ function DimensionsDialog() {
       intMaxY,
     );
 
-    setStrStep(newStep.toString(10));
+    setStrStep(newStep.toString());
     setStrMinX('1');
-    setStrMaxX((rawWidth - 1).toString(10));
+    setStrMaxX((rawWidth - 1).toString());
     setStrMinY('1');
-    setStrMaxY((rawHeight - 1).toString(10));
+    setStrMaxY((rawHeight - 1).toString());
   };
 
   return (
