@@ -20,7 +20,7 @@ function Controls() {
   const {
     busy: controlsBusy,
     getData,
-    goto,
+    gotoDialog,
     ping,
     ledOn,
     ledMax,
@@ -104,7 +104,7 @@ function Controls() {
                 className="controls__button"
                 disabled={disabled}
                 type="button"
-                onClick={goto}
+                onClick={gotoDialog}
               >
                 GoTo
               </button>

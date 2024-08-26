@@ -4,7 +4,7 @@ import { P1XCommands } from '../../types/P1X';
 import { useWebUSB } from '../components/WebUSBProvider';
 
 interface UseSendMessage {
-  sendMessage: (message: number[]) => Promise<P1XMessage | null>,
+  sendMessage: (message: number[], capture: boolean) => Promise<P1XMessage | null>,
   getMoveToMessage: (x: number, y: number) => number[],
 }
 
@@ -25,24 +25,26 @@ export const useSendMessage = (): UseSendMessage => {
     ];
   };
 
-  const sendMessage = useCallback(async (message: number[]): Promise<P1XMessage | null> => new Promise((resolve) => {
-    if (!activePort) {
-      resolve(null);
-      return;
-    }
+  const sendMessage = useCallback(async (message: number[], capture: boolean): Promise<P1XMessage | null> => (
+    new Promise((resolve) => {
+      if (!activePort) {
+        resolve(null);
+        return;
+      }
 
-    const timer = window.setInterval(() => {
-      // eslint-disable-next-line no-console
-      console.log('pinging...');
-      activePort.send(new Uint8Array([P1XCommands.SILENT_PING]), false);
-    }, 10000);
+      const timer = window.setInterval(() => {
+        // eslint-disable-next-line no-console
+        console.log('pinging...');
+        activePort.send(new Uint8Array([P1XCommands.SILENT_PING]), false);
+      }, 10000);
 
-    (async () => {
-      const deviceMessage = await activePort.send(new Uint8Array(message), true);
-      window.clearInterval(timer);
-      resolve(deviceMessage?.message || null);
-    })();
-  }), [activePort]);
+      (async () => {
+        const deviceMessage = await activePort.send(new Uint8Array(message), capture);
+        window.clearInterval(timer);
+        resolve(deviceMessage?.message || null);
+      })();
+    })
+  ), [activePort]);
 
   return {
     getMoveToMessage,

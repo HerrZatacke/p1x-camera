@@ -3,16 +3,16 @@ import { P1XCommands } from '../../../types/P1X';
 import { useSendMessage } from '../../hooks/useSendMessage';
 import useDialogStore from '../../stores/dialogStore';
 import useSettingsStore from '../../stores/settingsStore';
+import type { Sensitivity } from '../../stores/dialogStore';
 import type { ScanConstraints } from '../../stores/settingsStore';
 import type { P1XDataMessage } from '../../../types/P1X';
-import type { Answers } from '../../stores/dialogStore';
 import type { Point } from '../../hooks/useScanData';
 
 
 interface UseControls {
   busy: boolean,
   getData: () => Promise<void>,
-  goto: () => Promise<void>,
+  gotoDialog: () => Promise<void>,
   ledOn: () => Promise<void>,
   ledMax: () => Promise<void>,
   ledOff: () => Promise<void>,
@@ -24,19 +24,18 @@ interface UseControls {
 export const useControls = (): UseControls => {
   const [busy, setBusy] = useState<boolean>(false);
   const { sendMessage, getMoveToMessage } = useSendMessage();
-  const { setDialog, setShowDimensionsDialog, setShowGoToDialog } = useDialogStore();
+  const { setShowDimensionsDialog, setShowGoToDialog, setShowSensitivityDialog } = useDialogStore();
   const { setScanConstraints } = useSettingsStore();
 
   const getData = async () => {
     setBusy(true);
-    // eslint-disable-next-line no-console
-    console.log(await sendMessage([P1XCommands.READ_DATA]));
+    await sendMessage([P1XCommands.READ_DATA], false);
     setBusy(false);
   };
 
-  const goto = async () => {
+  const gotoDialog = async () => {
     setBusy(true);
-    const { maxX, maxY, x, y } = (await sendMessage([P1XCommands.READ_DATA])) as P1XDataMessage;
+    const { maxX, maxY, x, y } = (await sendMessage([P1XCommands.READ_DATA], true)) as P1XDataMessage;
 
     setShowGoToDialog({ maxX,
       maxY,
@@ -48,77 +47,47 @@ export const useControls = (): UseControls => {
           return;
         }
 
-        // eslint-disable-next-line no-console
-        console.log(await sendMessage(getMoveToMessage(point.x, point.y)));
+        await sendMessage(getMoveToMessage(point.x, point.y), false);
 
         setBusy(false);
       } });
   };
 
   const ping = async () => {
-    sendMessage([P1XCommands.SILENT_PING]);
+    sendMessage([P1XCommands.SILENT_PING], true);
   };
 
   const sensitivityDialog = async () => {
     setBusy(true);
-    const { aGain, aTime, aStep } = (await sendMessage([P1XCommands.READ_DATA])) as P1XDataMessage;
+    const { aGain, aTime, aStep } = (await sendMessage([P1XCommands.READ_DATA], true)) as P1XDataMessage;
 
-    setDialog([
-      {
-        id: 'time',
-        message: 'Time',
-        min: 1,
-        max: 255,
-        value: aTime,
-      },
-      {
-        id: 'step',
-        message: 'Step',
-        min: 1,
-        max: 255,
-        value: aStep,
-      },
-      {
-        id: 'gain',
-        message: 'Gain',
-        min: 0,
-        max: 10,
-        value: aGain,
-      },
-    ], async (answers?: Answers) => {
+    setShowSensitivityDialog({
+      aGain,
+      aTime,
+      aStep,
+      callback: async (sensitivity?: Sensitivity) => {
 
-      if (!answers) {
+        if (!sensitivity) {
+          setBusy(false);
+          return;
+        }
+
+        await sendMessage([
+          P1XCommands.SET_SENSITIVITY,
+          sensitivity.aTime,
+          sensitivity.aStep,
+          sensitivity.aGain,
+        ], false);
+
         setBusy(false);
-        return;
-      }
-
-      const numberAnswers = Object.fromEntries(
-        Object.entries(answers).map(([key, value]) => {
-          let nValue = parseInt(value, 10);
-          if (isNaN(nValue)) {
-            nValue = 0;
-          }
-
-          return ([key, nValue]);
-        }),
-      );
-
-      // eslint-disable-next-line no-console
-      console.log(await sendMessage([
-        P1XCommands.SET_SENSITIVITY,
-        numberAnswers.time,
-        numberAnswers.step,
-        numberAnswers.gain,
-      ]));
-
-      setBusy(false);
+      },
     });
   };
 
   const dimensionsDialog = async () => {
     setBusy(true);
 
-    const { maxX, maxY } = (await sendMessage([P1XCommands.READ_DATA])) as P1XDataMessage;
+    const { maxX, maxY } = (await sendMessage([P1XCommands.READ_DATA], true)) as P1XDataMessage;
 
     setShowDimensionsDialog({
       maxX,
@@ -135,29 +104,26 @@ export const useControls = (): UseControls => {
 
   const ledMax = async () => {
     setBusy(true);
-    // eslint-disable-next-line no-console
-    console.log(await sendMessage([P1XCommands.LED, 100]));
+    await sendMessage([P1XCommands.LED, 100], false);
     setBusy(false);
   };
 
   const ledOn = async () => {
     setBusy(true);
-    // eslint-disable-next-line no-console
-    console.log(await sendMessage([P1XCommands.LED, 10]));
+    await sendMessage([P1XCommands.LED, 10], false);
     setBusy(false);
   };
 
   const ledOff = async () => {
     setBusy(true);
-    // eslint-disable-next-line no-console
-    console.log(await sendMessage([P1XCommands.LED, 0]));
+    await sendMessage([P1XCommands.LED, 0], false);
     setBusy(false);
   };
 
   return {
     busy,
     getData,
-    goto,
+    gotoDialog,
     ping,
     ledOn,
     ledMax,

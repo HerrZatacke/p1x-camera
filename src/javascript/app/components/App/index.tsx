@@ -3,7 +3,6 @@ import { useWebUSB } from '../WebUSBProvider';
 import Controls from '../Controls';
 import Messages from '../Messages';
 import DataView from '../DataView';
-import Dialog from '../Dialog/dialog';
 import Dialogs from '../Dialogs';
 
 function App() {
@@ -11,7 +10,6 @@ function App() {
 
   return (
     <>
-      <Dialog />
       <Dialogs />
       { enabled && <Controls /> }
       <DataView />

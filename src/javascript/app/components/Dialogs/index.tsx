@@ -1,12 +1,14 @@
 import React from 'react';
-import GoToDialog from './GoToDialog';
 import DimensionsDialog from './DimensionsDialog';
+import GoToDialog from './GoToDialog';
+import SensitivityDialog from './SensitivityDialog';
 
 function Dialogs() {
   return (
     <>
-      <GoToDialog />
       <DimensionsDialog />
+      <GoToDialog />
+      <SensitivityDialog />
     </>
   );
 }

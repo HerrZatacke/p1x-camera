@@ -136,7 +136,10 @@ export const useScanData = (): UseScanData => {
     }));
 
     // Before scanning, travel to start point
-    await sendMessage(getMoveToMessage(coords[0].x * scanConstraints.step, coords[0].y * scanConstraints.step));
+    await sendMessage(
+      getMoveToMessage(coords[0].x * scanConstraints.step, coords[0].y * scanConstraints.step),
+      true,
+    );
 
 
     const aquireData = async (): Promise<void> => {
@@ -146,9 +149,12 @@ export const useScanData = (): UseScanData => {
         return;
       }
 
-      await sendMessage(getMoveToMessage(nextCoords.x * scanConstraints.step, nextCoords.y * scanConstraints.step));
+      await sendMessage(
+        getMoveToMessage(nextCoords.x * scanConstraints.step, nextCoords.y * scanConstraints.step),
+        true,
+      );
 
-      const result = await sendMessage([P1XCommands.READ_DATA]);
+      const result = await sendMessage([P1XCommands.READ_DATA], true);
 
       if (result) {
         addData(nextCoords.x, nextCoords.y, result as P1XDataMessage as P1XChannels);

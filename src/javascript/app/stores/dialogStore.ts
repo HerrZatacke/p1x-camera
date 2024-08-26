@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { createRandomId } from '../hooks/useRandomId';
 import type { ScanConstraints } from './settingsStore';
 import type { Point } from '../hooks/useScanData';
 
@@ -11,13 +10,6 @@ export interface Question {
   value?: number,
 }
 
-export type Answers = Record<string, string>;
-export type DialogCallback = (answers?: Answers) => Promise<void>;
-export interface Dialog {
-  id: string,
-  questions: Question[],
-  callback: DialogCallback,
-}
 
 export type DimensionsDialogCallback = (scanConstraints?: ScanConstraints) => Promise<void>;
 export interface DimensionsParams {
@@ -35,43 +27,32 @@ export interface GoToParams {
   y: number,
 }
 
-export interface DialogState {
-  dialogs: Dialog[],
-  setDialog: (questions: Question[], answered: DialogCallback) => void,
+export interface Sensitivity {
+  aTime: number,
+  aStep: number,
+  aGain: number,
+}
 
+export type SensitivityDialogCallback = (sensitivity?: Sensitivity) => Promise<void>;
+export interface SensitivityParams extends Sensitivity {
+  callback: SensitivityDialogCallback,
+}
+
+export interface DialogState {
   dimensionsParams: DimensionsParams | null,
   setShowDimensionsDialog: (dimensionsParams: DimensionsParams) => void,
 
   goToParams: GoToParams | null,
   setShowGoToDialog: (goToParams: GoToParams) => void,
+
+  sensitivityParams: SensitivityParams | null,
+  setShowSensitivityDialog: (sensitivityParams: SensitivityParams) => void,
 }
 
-const useDialogStore = create<DialogState>((set, getState) => ({
-  dialogs: [],
+const useDialogStore = create<DialogState>((set) => ({
   dimensionsParams: null,
   goToParams: null,
-  setDialog: (questions: Question[], answered: DialogCallback) => {
-    const { dialogs } = getState();
-
-    const id = createRandomId();
-
-    const callback: DialogCallback = (answers?: Answers) => {
-      const { dialogs: dialogsAfterAdding } = getState();
-      set({ dialogs: dialogsAfterAdding.filter((dialog) => dialog.id !== id) });
-      return answered(answers);
-    };
-
-    set({
-      dialogs: [
-        ...dialogs,
-        {
-          id,
-          questions,
-          callback,
-        },
-      ],
-    });
-  },
+  sensitivityParams: null,
 
   setShowDimensionsDialog: (dimensionsParams: DimensionsParams) => {
     const callback: DimensionsDialogCallback = async (scanConstraints?: ScanConstraints) => {
@@ -96,6 +77,20 @@ const useDialogStore = create<DialogState>((set, getState) => ({
     set({
       goToParams: {
         ...goToParams,
+        callback,
+      },
+    });
+  },
+
+  setShowSensitivityDialog: (sensitivityParams: SensitivityParams) => {
+    const callback: SensitivityDialogCallback = async (sensitivity?: Sensitivity) => {
+      sensitivityParams.callback(sensitivity);
+      set({ sensitivityParams: null });
+    };
+
+    set({
+      sensitivityParams: {
+        ...sensitivityParams,
         callback,
       },
     });
