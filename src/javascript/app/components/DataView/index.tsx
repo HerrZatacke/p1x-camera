@@ -1,16 +1,20 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import clsx from 'clsx';
+import { Typography } from '@mui/material';
 import DataViewChannel from '../DataViewChannel';
 import DataViewRGB from '../DataViewRGB';
 import useScannedDataStore from '../../stores/scannedDataStore';
 import { P1XChannel, p1xChannels } from '../../../types/P1X';
+import { getMinMax } from '../../../tools/minMax';
 import type { RGBChannels } from '../../hooks/useDataView';
+import type { MinMax } from '../../../tools/minMax';
 
 import './index.scss';
 
 interface ChannelProps {
   name: P1XChannel,
   channelData: number[],
+  minMax: MinMax,
 }
 
 interface ActiveChannels {
@@ -38,7 +42,8 @@ function DataView() {
   const channelsData = useMemo<ChannelProps[]>(() => (
     p1xChannels.reduce((acc: ChannelProps[], name): ChannelProps[] => {
       const channelData = data[name];
-      return channelData ? [...acc, { name, channelData }] : acc;
+      const minMax = getMinMax(channelData || []);
+      return channelData ? [...acc, { name, channelData, minMax }] : acc;
     }, [])
   ), [data]);
 
@@ -82,7 +87,7 @@ function DataView() {
   return (
     <>
       <div className="data-view">
-        { channelsData.map(({ name, channelData }) => (
+        { channelsData.map(({ name, channelData, minMax }) => (
           <div className="data-view__element" key={name}>
             <h3 className="data-view__title">{ name }</h3>
             <DataViewChannel
@@ -91,6 +96,9 @@ function DataView() {
               color={channelColors[name]}
               channelData={channelData}
             />
+            <Typography variant="body2">
+              { `${minMax.min} to ${minMax.max}` }
+            </Typography>
             <div className="data-view__buttons">
               <button
                 type="button"

@@ -1,11 +1,7 @@
 import { useCallback } from 'react';
 import type { Dimensions } from '../stores/scannedDataStore';
 import { getCoordinatesFromIndex } from '../../tools/dimensions';
-
-export interface MinMax {
-  min: number,
-  max: number,
-}
+import { getMinMax } from '../../tools/minMax';
 
 export interface RGBChannels {
   channelR: number[][],
@@ -39,10 +35,7 @@ export const useDataView = (dimensions: Dimensions): UseDataView => {
     const width = dimensions.width;
     const { data } = imageData;
 
-    const minMax: MinMax = channelData.reduce((acc: MinMax, value: number): MinMax => ({
-      min: Math.min(acc.min, value),
-      max: Math.max(acc.max, value),
-    }), { min: 65536, max: 0 });
+    const minMax = getMinMax(channelData);
 
     channelData.forEach((value, index) => {
       if (value < 0) {

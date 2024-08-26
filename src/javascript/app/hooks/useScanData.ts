@@ -102,6 +102,8 @@ export const useScanData = (): UseScanData => {
       clearData();
     }
 
+    const { maxX: globalMaxX } = await sendMessage([P1XCommands.READ_DATA], true) as P1XDataMessage;
+
     const width = scanConstraints.maxX - scanConstraints.minX;
     const height = scanConstraints.maxY - scanConstraints.minY;
 
@@ -142,7 +144,7 @@ export const useScanData = (): UseScanData => {
 
     // Before scanning, travel to start point
     await sendMessage(
-      getMoveToMessage(coords[0].x * scanConstraints.step, coords[0].y * scanConstraints.step),
+      getMoveToMessage(globalMaxX - (coords[0].x * scanConstraints.step), coords[0].y * scanConstraints.step),
       true,
     );
 
@@ -155,7 +157,7 @@ export const useScanData = (): UseScanData => {
       }
 
       await sendMessage(
-        getMoveToMessage(nextCoords.x * scanConstraints.step, nextCoords.y * scanConstraints.step),
+        getMoveToMessage(globalMaxX - (nextCoords.x * scanConstraints.step), nextCoords.y * scanConstraints.step),
         true,
       );
 

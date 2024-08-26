@@ -17,10 +17,6 @@ pre {
   padding: 2px;
 }
 
-canvas {
-  transform: scaleX(-1);
-}
-
 button {
   @include fontFamily;
   font-size: 14px;
