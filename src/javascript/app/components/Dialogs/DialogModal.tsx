@@ -3,6 +3,7 @@ import type { PropsWithChildren } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 
 interface Props extends PropsWithChildren {
+  id: string,
   open: boolean,
   title: string,
   cancelLabel: string,
@@ -11,15 +12,14 @@ interface Props extends PropsWithChildren {
   confirm: () => void,
 }
 
-function DialogModal({ open, title, cancelLabel, confirmLabel, cancel, confirm, children }: Props) {
+function DialogModal({ id, open, title, cancelLabel, confirmLabel, cancel, confirm, children }: Props) {
   return (
     <Dialog
       open={open}
       onClose={cancel}
-      aria-labelledby="dimensions-dialog-modal-title"
-      className="dimensions-dialog"
+      aria-labelledby={`${id}-modal-title`}
     >
-      <DialogTitle id="dimensions-dialog-modal-title" variant="h6" component="h3">
+      <DialogTitle id={`${id}-modal-title`} variant="h6" component="h3">
         { title }
       </DialogTitle>
       <DialogContent>

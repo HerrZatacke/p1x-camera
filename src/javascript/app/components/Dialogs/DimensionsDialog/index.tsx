@@ -113,6 +113,7 @@ function DimensionsDialog() {
 
   return (
     <DialogModal
+      id="dimensions-dialog"
       open={Boolean(dimensionsParams)}
       title="Set scan dimensions"
       cancelLabel="Cancel"
@@ -120,7 +121,7 @@ function DimensionsDialog() {
       cancel={cancel}
       confirm={update}
     >
-      <Stack useFlexGap gap={2} direction="row">
+      <Stack useFlexGap gap={2} direction="row" className="dimensions-dialog">
         <Stack useFlexGap gap={1}>
           <TextField
             label="Minimum X"
