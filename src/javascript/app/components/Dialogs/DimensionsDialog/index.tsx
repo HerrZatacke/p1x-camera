@@ -1,22 +1,23 @@
 import React, { useCallback, useState, useMemo } from 'react';
 import type { CSSPropertiesVars } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Stack, Typography } from '@mui/material';
+import { TextField, Button, Stack, Typography } from '@mui/material';
+import DialogModal from '../DialogModal';
 import useDialogStore from '../../../stores/dialogStore';
-
-import './index.scss';
 import useSettingsStore from '../../../stores/settingsStore';
 import { calcRect } from './calcRect';
+
+import './index.scss';
 
 
 function DimensionsDialog() {
   const { dimensionsParams } = useDialogStore();
   const { scanConstraints } = useSettingsStore();
 
-  const [strStep, setStrStep] = useState<string>(scanConstraints.step.toString(10));
-  const [strMinX, setStrMinX] = useState<string>(scanConstraints.minX.toString(10));
-  const [strMaxX, setStrMaxX] = useState<string>(scanConstraints.maxX.toString(10));
-  const [strMinY, setStrMinY] = useState<string>(scanConstraints.minY.toString(10));
-  const [strMaxY, setStrMaxY] = useState<string>(scanConstraints.maxY.toString(10));
+  const [strStep, setStrStep] = useState<string>(scanConstraints.step.toString());
+  const [strMinX, setStrMinX] = useState<string>(scanConstraints.minX.toString());
+  const [strMaxX, setStrMaxX] = useState<string>(scanConstraints.maxX.toString());
+  const [strMinY, setStrMinY] = useState<string>(scanConstraints.minY.toString());
+  const [strMaxY, setStrMaxY] = useState<string>(scanConstraints.maxY.toString());
 
   const intStep = parseInt(strStep, 10) || 1;
   const intMinX = parseInt(strMinX, 10) || 0;
@@ -111,102 +112,85 @@ function DimensionsDialog() {
   };
 
   return (
-    <Dialog
+    <DialogModal
       open={Boolean(dimensionsParams)}
-      onClose={cancel}
-      aria-labelledby="dimensions-dialog-modal-title"
-      className="dimensions-dialog"
+      title="Set scan dimensions"
+      cancelLabel="Cancel"
+      confirmLabel="Set"
+      cancel={cancel}
+      confirm={update}
     >
-      <DialogTitle id="dimensions-dialog-modal-title" variant="h6" component="h3">
-        Set scan dimensions
-      </DialogTitle>
-      <DialogContent>
-        <Stack useFlexGap gap={2} direction="row">
-          <Stack useFlexGap gap={1}>
-            <TextField
-              label="Minimum X"
-              variant="filled"
-              value={strMinX}
-              onChange={({ target }) => setStrMinX(target.value)}
-            />
-            <TextField
-              label="Maximum X"
-              variant="filled"
-              value={strMaxX}
-              onChange={({ target }) => setStrMaxX(target.value)}
-            />
-            <TextField
-              label="Minimum Y"
-              variant="filled"
-              value={strMinY}
-              onChange={({ target }) => setStrMinY(target.value)}
-            />
-            <TextField
-              label="Maximum Y"
-              variant="filled"
-              value={strMaxY}
-              onChange={({ target }) => setStrMaxY(target.value)}
-            />
-            <TextField
-              label="Step"
-              variant="filled"
-              value={strStep}
-              onChange={({ target }) => setStrStep(target.value)}
-            />
-            <Button variant="outlined" onClick={setPreview}>Preview</Button>
-            <Button variant="outlined" onClick={setCenter}>Center</Button>
-            <Button variant="outlined" onClick={setFullImage}>Full Image</Button>
-          </Stack>
-          <Stack useFlexGap gap={2}>
-            <Typography variant="body2">
-              {`Available size with step ${strStep}:`}
-              <br />
-              {`${rect.rawWidth}x${rect.rawHeight}`}
-            </Typography>
-            <Typography variant="body2">
-              Resulting scanned image size:
-              <br />
-              {`${rect.rawAreaWidth}x${rect.rawAreaHeight}`}
-            </Typography>
-            <svg
-              className="dimensions-dialog__size-preview"
-              viewBox={`0 0 ${rect.displayTotalWidth} ${rect.displayTotalHeight}`}
-              style={svgSize}
-            >
-              <rect
-                width={rect.displayTotalWidth}
-                height={rect.displayTotalHeight}
-                fill="#555555"
-              />
-              <rect
-                x={rect.displayAreaX}
-                y={rect.displayAreaY}
-                width={rect.displayAreaWidth}
-                height={rect.displayAreaHeight}
-                fill="#448888"
-              />
-            </svg>
-            <pre style={{ fontSize: '10px' }}>
-              { JSON.stringify(rect, null, 2) }
-            </pre>
-          </Stack>
+      <Stack useFlexGap gap={2} direction="row">
+        <Stack useFlexGap gap={1}>
+          <TextField
+            label="Minimum X"
+            variant="filled"
+            value={strMinX}
+            onChange={({ target }) => setStrMinX(target.value)}
+          />
+          <TextField
+            label="Maximum X"
+            variant="filled"
+            value={strMaxX}
+            onChange={({ target }) => setStrMaxX(target.value)}
+          />
+          <TextField
+            label="Minimum Y"
+            variant="filled"
+            value={strMinY}
+            onChange={({ target }) => setStrMinY(target.value)}
+          />
+          <TextField
+            label="Maximum Y"
+            variant="filled"
+            value={strMaxY}
+            onChange={({ target }) => setStrMaxY(target.value)}
+          />
+          <TextField
+            label="Step"
+            variant="filled"
+            value={strStep}
+            onChange={({ target }) => setStrStep(target.value)}
+          />
+          <Button variant="outlined" onClick={setPreview}>Preview</Button>
+          <Button variant="outlined" onClick={setCenter}>Center</Button>
+          <Button variant="outlined" onClick={setFullImage}>Full Image</Button>
         </Stack>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          onClick={cancel}
-          variant="outlined"
-        >
-          Cancel
-        </Button>
-        <Button
-          onClick={update}
-          variant="contained"
-        >
-          Set
-        </Button>
-      </DialogActions>
-    </Dialog>
+        <Stack useFlexGap gap={2}>
+          <Typography variant="body2">
+            {`Available size with step ${strStep}:`}
+            <br />
+            {`${rect.rawWidth}x${rect.rawHeight}`}
+          </Typography>
+          <Typography variant="body2">
+            Resulting scanned image size:
+            <br />
+            {`${rect.rawAreaWidth}x${rect.rawAreaHeight}`}
+          </Typography>
+          <svg
+            className="dimensions-dialog__size-preview"
+            viewBox={`0 0 ${rect.displayTotalWidth} ${rect.displayTotalHeight}`}
+            style={svgSize}
+          >
+            <rect
+              width={rect.displayTotalWidth}
+              height={rect.displayTotalHeight}
+              fill="#555555"
+            />
+            <rect
+              x={rect.displayAreaX}
+              y={rect.displayAreaY}
+              width={rect.displayAreaWidth}
+              height={rect.displayAreaHeight}
+              fill="#448888"
+            />
+          </svg>
+          <pre style={{ fontSize: '10px' }}>
+            { JSON.stringify(rect, null, 2) }
+          </pre>
+        </Stack>
+      </Stack>
+    </DialogModal>
   );
 }
 
