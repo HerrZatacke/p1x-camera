@@ -21,7 +21,6 @@ function Controls() {
     busy: controlsBusy,
     getData,
     goto,
-    center,
     ping,
     ledOn,
     ledMax,
@@ -108,15 +107,6 @@ function Controls() {
                 onClick={goto}
               >
                 GoTo
-              </button>
-
-              <button
-                className="controls__button"
-                disabled={disabled}
-                type="button"
-                onClick={center}
-              >
-                Center
               </button>
 
               <button

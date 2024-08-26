@@ -6,6 +6,7 @@ import useSettingsStore from '../../stores/settingsStore';
 import type { ScanConstraints } from '../../stores/settingsStore';
 import type { P1XDataMessage } from '../../../types/P1X';
 import type { Answers } from '../../stores/dialogStore';
+import type { Point } from '../../hooks/useScanData';
 
 
 interface UseControls {
@@ -15,7 +16,6 @@ interface UseControls {
   ledOn: () => Promise<void>,
   ledMax: () => Promise<void>,
   ledOff: () => Promise<void>,
-  center: () => Promise<void>,
   ping: () => Promise<void>,
   sensitivityDialog: () => Promise<void>,
   dimensionsDialog: () => Promise<void>,
@@ -24,7 +24,7 @@ interface UseControls {
 export const useControls = (): UseControls => {
   const [busy, setBusy] = useState<boolean>(false);
   const { sendMessage, getMoveToMessage } = useSendMessage();
-  const { setDialog, setShowDimensionsDialog } = useDialogStore();
+  const { setDialog, setShowDimensionsDialog, setShowGoToDialog } = useDialogStore();
   const { setScanConstraints } = useSettingsStore();
 
   const getData = async () => {
@@ -38,52 +38,21 @@ export const useControls = (): UseControls => {
     setBusy(true);
     const { maxX, maxY, x, y } = (await sendMessage([P1XCommands.READ_DATA])) as P1XDataMessage;
 
-    setDialog([
-      {
-        id: 'x',
-        message: 'move to X?',
-        min: 0,
-        max: maxX,
-        value: x,
-      },
-      {
-        id: 'y',
-        message: 'move to Y?',
-        min: 0,
-        max: maxY,
-        value: y,
-      },
-    ], async (answers?: Answers) => {
+    setShowGoToDialog({ maxX,
+      maxY,
+      x,
+      y,
+      callback: async (point?: Point) => {
+        if (!point) {
+          setBusy(false);
+          return;
+        }
 
-      if (!answers) {
+        // eslint-disable-next-line no-console
+        console.log(await sendMessage(getMoveToMessage(point.x, point.y)));
+
         setBusy(false);
-        return;
-      }
-
-      const numberAnswers = Object.fromEntries(
-        Object.entries(answers).map(([key, value]) => {
-          let nValue = parseInt(value, 10);
-          if (isNaN(nValue)) {
-            nValue = 0;
-          }
-
-          return ([key, nValue]);
-        }),
-      );
-
-      // eslint-disable-next-line no-console
-      console.log(await sendMessage(getMoveToMessage(numberAnswers.x, numberAnswers.y)));
-
-      setBusy(false);
-    });
-  };
-
-  const center = async () => {
-    setBusy(true);
-    const { maxX, maxY } = (await sendMessage([P1XCommands.READ_DATA])) as P1XDataMessage;
-    // eslint-disable-next-line no-console
-    console.log(await sendMessage(getMoveToMessage(Math.floor(maxX / 2), Math.floor(maxY / 2))));
-    setBusy(false);
+      } });
   };
 
   const ping = async () => {
@@ -189,7 +158,6 @@ export const useControls = (): UseControls => {
     busy,
     getData,
     goto,
-    center,
     ping,
     ledOn,
     ledMax,
