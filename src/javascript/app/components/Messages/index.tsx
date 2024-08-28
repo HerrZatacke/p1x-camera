@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { Stack } from '@mui/material';
 import { useWebUSB } from '../WebUSBProvider';
-import type { P1XErrorMessage, P1XInfoMessage, P1XMessage, P1XWarningMessage, P1XHomingMessage } from '../../../types/P1X';
 import { P1XType } from '../../../types/P1X';
+import type { P1XErrorMessage, P1XInfoMessage, P1XMessage, P1XWarningMessage, P1XHomingMessage } from '../../../types/P1X';
 import type { DeviceMessage } from '../../../tools/USBSerialPortEE';
 
 import './index.scss';
@@ -57,7 +58,7 @@ function Messages() {
   const [showCaptured, setShowCaptured] = useState<boolean>(false);
 
   return (
-    <>
+    <Stack useFlexGap gap={4} direction="column">
       <label>
         <span>Show captured messages</span>
         <input
@@ -79,7 +80,7 @@ function Messages() {
             );
           })}
       </ul>
-    </>
+    </Stack>
   );
 }
 

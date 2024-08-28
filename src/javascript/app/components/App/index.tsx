@@ -1,4 +1,5 @@
 import React from 'react';
+import { Stack } from '@mui/material';
 import { useWebUSB } from '../WebUSBProvider';
 import Controls from '../Controls';
 import Messages from '../Messages';
@@ -13,9 +14,11 @@ function App() {
     <>
       <Dialogs />
       { enabled && <Controls /> }
-      <DataView />
-      <DataViewRGB />
-      <Messages />
+      <Stack useFlexGap gap={4} direction="row" justifyContent="center">
+        <DataView />
+        <DataViewRGB />
+        <Messages />
+      </Stack>
     </>
   );
 }

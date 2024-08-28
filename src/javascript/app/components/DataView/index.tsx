@@ -1,16 +1,12 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import clsx from 'clsx';
-import { Typography } from '@mui/material';
+import React, { useCallback, useMemo } from 'react';
+import { Typography, Stack } from '@mui/material';
 import DataViewChannel from '../DataViewChannel';
-import DataViewRGB from '../DataViewRGB';
 import useScannedDataStore from '../../stores/scannedDataStore';
+import useSettingsStore from '../../stores/settingsStore';
 import { P1XChannel, p1xChannels } from '../../../types/P1X';
 import { getMinMax } from '../../../tools/minMax';
-import type { RGBChannels } from '../../hooks/useDataView';
 import type { MinMax } from '../../../tools/minMax';
-
-import './index.scss';
-import useSettingsStore from '../../stores/settingsStore';
+import RGBSwitch from '../RGBSwitch';
 
 interface ChannelProps {
   name: P1XChannel,
@@ -44,11 +40,9 @@ function DataView() {
 
   const { activeChannels, setActiveChannels } = useSettingsStore();
 
-  const toggleChannel = useCallback((color: 'r'|'g'|'b', channel: P1XChannel) => {
+  const setChannel = useCallback((color: 'r'|'g'|'b', channel: P1XChannel, checked: boolean) => {
     const channels = activeChannels[color];
-    const active = channels.includes(channel);
-
-    const newChannels = active ? channels.filter((c) => c !== channel) : [...channels, channel];
+    const newChannels = checked ? [...channels, channel] : channels.filter((c) => c !== channel);
 
     setActiveChannels({
       ...activeChannels,
@@ -57,10 +51,9 @@ function DataView() {
   }, [activeChannels, setActiveChannels]);
 
   return (
-    <div className="data-view">
+    <Stack useFlexGap gap={1} direction="column" className="data-view" justifyContent="flex-start" alignItems="center">
       { channelsData.map(({ name, channelData, minMax }) => (
-        <div className="data-view__element" key={name}>
-          <h3 className="data-view__title">{ name }</h3>
+        <Stack useFlexGap gap={2} direction="row" key={name}>
           <DataViewChannel
             name={name}
             dimensions={dimensions}
@@ -68,35 +61,37 @@ function DataView() {
             channelData={channelData}
           />
           <Typography variant="body2">
+            { name }
+            <br />
             { `${minMax.min} to ${minMax.max}` }
           </Typography>
-          <div className="data-view__buttons">
-            <button
-              type="button"
-              className={clsx('data-view__button data-view__button--blue', {
-                'data-view__button--active': activeChannels.b.includes(name),
-              })}
-              onClick={() => toggleChannel('b', name)}
+          <Stack useFlexGap direction="column">
+            <RGBSwitch
+              checked={activeChannels.b.includes(name)}
+              rgbChannel="b"
+              onChange={({ target }) => {
+                setChannel('b', name, target.checked);
+              }}
             />
-            <button
-              type="button"
-              className={clsx('data-view__button data-view__button--green', {
-                'data-view__button--active': activeChannels.g.includes(name),
-              })}
-              onClick={() => toggleChannel('g', name)}
+            <RGBSwitch
+              checked={activeChannels.g.includes(name)}
+              rgbChannel="g"
+              onChange={({ target }) => {
+                setChannel('g', name, target.checked);
+              }}
             />
-            <button
-              type="button"
-              className={clsx('data-view__button data-view__button--red', {
-                'data-view__button--active': activeChannels.r.includes(name),
-              })}
-              onClick={() => toggleChannel('r', name)}
+            <RGBSwitch
+              checked={activeChannels.r.includes(name)}
+              rgbChannel="r"
+              onChange={({ target }) => {
+                setChannel('r', name, target.checked);
+              }}
             />
-          </div>
+          </Stack>
 
-        </div>
+        </Stack>
       ))}
-    </div>
+    </Stack>
   );
 }
 
