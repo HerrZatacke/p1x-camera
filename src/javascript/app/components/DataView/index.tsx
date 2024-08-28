@@ -7,6 +7,7 @@ import { P1XChannel, p1xChannels } from '../../../types/P1X';
 import { getMinMax } from '../../../tools/minMax';
 import type { MinMax } from '../../../tools/minMax';
 import RGBSwitch from '../RGBSwitch';
+import Histogram from '../Histogram';
 
 interface ChannelProps {
   name: P1XChannel,
@@ -54,6 +55,12 @@ function DataView() {
     <Stack useFlexGap gap={1} direction="column" className="data-view" justifyContent="flex-start" alignItems="center">
       { channelsData.map(({ name, channelData, minMax }) => (
         <Stack useFlexGap gap={2} direction="row" key={name}>
+          <Histogram
+            numBins={64}
+            barWidth={4}
+            channelData={channelData}
+            height={dimensions.height}
+          />
           <DataViewChannel
             name={name}
             dimensions={dimensions}

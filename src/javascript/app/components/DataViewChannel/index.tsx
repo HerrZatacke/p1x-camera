@@ -32,7 +32,9 @@ function DataViewChannel({ channelData, dimensions, color, name }: Props) {
   }, [color, canvasRef, channelData, dimensions, channelDataToImageData]);
 
   return (
-    <canvas className="data-view-channel" ref={canvasRef} title={name} />
+    <div className="data-view-channel">
+      <canvas className="data-view-channel__canvas" ref={canvasRef} title={name} />
+    </div>
   );
 }
 
