@@ -51,8 +51,11 @@ function RGBSwitch(props: Props) {
     },
   };
 
+  const switchProps: SwitchProps = { ...props };
+  delete (switchProps as Partial<Props>).rgbChannel;
+
   return (
-    <Switch {...props} sx={styles} />
+    <Switch {...switchProps} sx={styles} />
   );
 }
 
