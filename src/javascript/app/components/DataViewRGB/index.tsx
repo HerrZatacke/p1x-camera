@@ -1,18 +1,22 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import type { CSSPropertiesVars } from 'react';
 import type { RGBChannels } from '../../hooks/useDataView';
-import type { Dimensions } from '../../stores/scannedDataStore';
 import { useDataView } from '../../hooks/useDataView';
 
 import './index.scss';
+import useSettingsStore from '../../stores/settingsStore';
+import useScannedDataStore from '../../stores/scannedDataStore';
 
-export interface Props {
-  channels: RGBChannels,
-  dimensions: Dimensions,
-}
-
-function DataViewRGB({ channels, dimensions }: Props) {
+function DataViewRGB() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const { activeChannels } = useSettingsStore();
+  const { data, dimensions } = useScannedDataStore();
+
+  const channels: RGBChannels = useMemo(() => ({
+    channelR: activeChannels.r.map((channelName): number[] => data[channelName] || []),
+    channelG: activeChannels.g.map((channelName): number[] => data[channelName] || []),
+    channelB: activeChannels.b.map((channelName): number[] => data[channelName] || []),
+  }), [activeChannels, data]);
 
   const { rgbChannelsDataToImageData } = useDataView(dimensions);
 
