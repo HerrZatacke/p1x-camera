@@ -11,10 +11,14 @@ export interface Dimensions {
 
 export type ChannelData = Partial<Record<P1XChannel, number[]>>;
 
-export interface ScannedDataState {
+export interface ScannedData {
   data: ChannelData,
   dimensions: Dimensions,
+}
+
+export interface ScannedDataState extends ScannedData {
   clearData: () => void,
+  setAllData: (scannedData: ScannedData) => void,
   addData: (x: number, y: number, message: P1XChannels) => void,
   setDimensions: (width: number, height: number) => void,
 }
@@ -28,7 +32,10 @@ const useScannedDataStore = create(
         height: 0,
       },
       clearData: () => {
-        set({ data: {} });
+        set({ data: {}, dimensions: { width: 0, height: 0 } });
+      },
+      setAllData: (scannedData: ScannedData) => {
+        set(scannedData);
       },
       addData: (x: number, y: number, message: P1XChannels) => {
         const { data, dimensions } = getState();

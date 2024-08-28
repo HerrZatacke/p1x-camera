@@ -1,13 +1,17 @@
+import type { ChangeEvent } from 'react';
 import { useState } from 'react';
+import { saveAs } from 'file-saver';
+import readFileAs, { ReadAs } from '../../../tools/readFileAs';
 import { P1XCommands } from '../../../types/P1X';
 import { useSendMessage } from '../../hooks/useSendMessage';
 import useDialogStore from '../../stores/dialogStore';
 import useSettingsStore from '../../stores/settingsStore';
+import useScannedDataStore from '../../stores/scannedDataStore';
+import type { P1XDataMessage } from '../../../types/P1X';
 import type { Sensitivity } from '../../stores/dialogStore';
 import type { ScanConstraints } from '../../stores/settingsStore';
-import type { P1XDataMessage } from '../../../types/P1X';
 import type { Point } from '../../hooks/useScanData';
-
+import type { ScannedData } from '../../stores/scannedDataStore';
 
 interface UseControls {
   busy: boolean,
@@ -17,6 +21,8 @@ interface UseControls {
   ledMax: () => Promise<void>,
   ledOff: () => Promise<void>,
   ping: () => Promise<void>,
+  downloadData: () => void,
+  importData: (ev: ChangeEvent<HTMLInputElement>) => Promise<void>,
   sensitivityDialog: () => Promise<void>,
   dimensionsDialog: () => Promise<void>,
 }
@@ -24,6 +30,7 @@ interface UseControls {
 export const useControls = (): UseControls => {
   const [busy, setBusy] = useState<boolean>(false);
   const { sendMessage, getMoveToMessage } = useSendMessage();
+  const { data, dimensions, setAllData } = useScannedDataStore();
   const { setShowDimensionsDialog, setShowGoToDialog, setShowSensitivityDialog } = useDialogStore();
   const { setScanConstraints } = useSettingsStore();
 
@@ -120,6 +127,37 @@ export const useControls = (): UseControls => {
     setBusy(false);
   };
 
+  const downloadData = () => {
+    const exportContent = JSON.stringify({ data, dimensions });
+
+    const blob = new Blob([exportContent], {
+      type: 'application/json',
+    });
+
+    saveAs(blob, 'scanned.json');
+  };
+
+  const importData = async (ev: ChangeEvent<HTMLInputElement>) => {
+    const target = ev.target;
+
+    if (!target.files) {
+      return;
+    }
+
+    const file = target.files[0];
+
+    if (file) {
+      const fileContent = JSON.parse(await readFileAs(file, ReadAs.TEXT)) as ScannedData;
+      if (
+        fileContent.dimensions.width &&
+        fileContent.dimensions.height &&
+        typeof fileContent.data === 'object'
+      ) {
+        setAllData(fileContent);
+      }
+    }
+  };
+
   return {
     busy,
     getData,
@@ -128,6 +166,8 @@ export const useControls = (): UseControls => {
     ledOn,
     ledMax,
     ledOff,
+    downloadData,
+    importData,
     sensitivityDialog,
     dimensionsDialog,
   };

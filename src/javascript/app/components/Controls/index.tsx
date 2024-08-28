@@ -25,6 +25,8 @@ function Controls() {
     ledOn,
     ledMax,
     ledOff,
+    downloadData,
+    importData,
     sensitivityDialog,
     dimensionsDialog,
   } = useControls();
@@ -153,6 +155,20 @@ function Controls() {
               >
                 Led Off
               </button>
+
+              <button
+                className="controls__button"
+                disabled={disabled}
+                type="button"
+                onClick={downloadData}
+              >
+                Download Data
+              </button>
+
+              <input
+                type="file"
+                onChange={importData}
+              />
             </>
           )
         }
