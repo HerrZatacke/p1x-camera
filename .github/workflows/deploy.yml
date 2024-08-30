@@ -1,0 +1,31 @@
+name: Build 🧱 and Deploy 🛳
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout 💳
+        uses: actions/checkout@v3.3.0
+
+      - name: Setup node 💻
+        uses: actions/setup-node@v3.6.0
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install npm dependencies 🔗
+        run: npm install
+
+      - name: Build 🧱
+        run: npm run build
+
+      - name: Deploy to GitHub-Pages 🛳
+        uses: JamesIves/github-pages-deploy-action@v4.4.1
+        with:
+          branch: gh-pages
+          folder: dist
