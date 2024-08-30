@@ -12,6 +12,7 @@ import Histogram from '../Histogram';
 interface ChannelProps {
   name: P1XChannel,
   channelData: number[],
+  channelRange: MinMax,
   minMax: MinMax,
 }
 
@@ -29,15 +30,16 @@ const channelColors: Record<P1XChannel, string> = {
 };
 
 function DataView() {
-  const { data, dimensions } = useScannedDataStore();
+  const { data, ranges, dimensions } = useScannedDataStore();
 
   const channelsData = useMemo<ChannelProps[]>(() => (
     p1xChannels.reduce((acc: ChannelProps[], name): ChannelProps[] => {
       const channelData = data[name];
       const minMax = getMinMax(channelData || []);
-      return channelData ? [...acc, { name, channelData, minMax }] : acc;
+      const channelRange = ranges[name] || minMax;
+      return channelData ? [...acc, { name, channelData, channelRange, minMax }] : acc;
     }, [])
-  ), [data]);
+  ), [data, ranges]);
 
   const { activeChannels, setActiveChannels } = useSettingsStore();
 
@@ -53,9 +55,10 @@ function DataView() {
 
   return (
     <Stack useFlexGap gap={1} direction="column" className="data-view" justifyContent="flex-start" alignItems="center">
-      { channelsData.map(({ name, channelData, minMax }) => (
+      { channelsData.map(({ name, channelData, channelRange, minMax }) => (
         <Stack useFlexGap gap={2} direction="row" key={name}>
           <Histogram
+            name={name}
             numBins={64}
             barWidth={4}
             channelData={channelData}
@@ -66,6 +69,7 @@ function DataView() {
             dimensions={dimensions}
             color={channelColors[name]}
             channelData={channelData}
+            channelRange={channelRange}
           />
           <Typography variant="body2">
             { name }

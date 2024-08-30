@@ -30,7 +30,7 @@ interface UseControls {
 export const useControls = (): UseControls => {
   const [busy, setBusy] = useState<boolean>(false);
   const { sendMessage, getMoveToMessage } = useSendMessage();
-  const { data, dimensions, setAllData } = useScannedDataStore();
+  const { data, dimensions, ranges, setAllData } = useScannedDataStore();
   const { setShowDimensionsDialog, setShowGoToDialog, setShowSensitivityDialog } = useDialogStore();
   const { setScanConstraints } = useSettingsStore();
 
@@ -128,7 +128,7 @@ export const useControls = (): UseControls => {
   };
 
   const downloadData = () => {
-    const exportContent = JSON.stringify({ data, dimensions });
+    const exportContent = JSON.stringify({ dimensions, ranges, data });
 
     const blob = new Blob([exportContent], {
       type: 'application/json',

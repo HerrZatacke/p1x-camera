@@ -1,17 +1,19 @@
 import React, { useEffect, useRef } from 'react';
 import { useDataView } from '../../hooks/useDataView';
 import type { Dimensions } from '../../stores/scannedDataStore';
+import type { MinMax } from '../../../tools/minMax';
 
 import './index.scss';
 
 export interface Props {
   channelData: number[],
+  channelRange: MinMax,
   dimensions: Dimensions,
   color: string,
   name: string,
 }
 
-function DataViewChannel({ channelData, dimensions, color, name }: Props) {
+function DataViewChannel({ channelData, channelRange, dimensions, color, name }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const { channelDataToImageData } = useDataView(dimensions);
 
@@ -22,14 +24,14 @@ function DataViewChannel({ channelData, dimensions, color, name }: Props) {
       return;
     }
 
-    const imageData = channelDataToImageData(channelData, color);
+    const imageData = channelDataToImageData(channelData, channelRange, color);
 
     canvasRef.current.width = dimensions.width;
     canvasRef.current.height = dimensions.height;
 
     context.putImageData(imageData, 0, 0);
 
-  }, [color, canvasRef, channelData, dimensions, channelDataToImageData]);
+  }, [color, canvasRef, channelData, dimensions, channelDataToImageData, channelRange]);
 
   return (
     <div className="data-view-channel">

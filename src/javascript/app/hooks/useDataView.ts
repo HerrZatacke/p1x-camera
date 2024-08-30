@@ -1,7 +1,9 @@
 import { useCallback } from 'react';
 import type { Dimensions } from '../stores/scannedDataStore';
+import type { MinMax } from '../../tools/minMax';
 import { getCoordinatesFromIndex } from '../../tools/dimensions';
 import { getMinMax } from '../../tools/minMax';
+import { applyChannelRange } from '../../tools/applyChannelRange';
 
 export interface RGBChannels {
   channelR: number[][],
@@ -10,7 +12,7 @@ export interface RGBChannels {
 }
 
 export interface UseDataView {
-  channelDataToImageData: (channelData: number[], color: string) => ImageData,
+  channelDataToImageData: (channelData: number[], channelRange: MinMax, color: string) => ImageData,
   rgbChannelsDataToImageData: (channels: RGBChannels) => ImageData,
 }
 
@@ -66,6 +68,7 @@ export const useDataView = (dimensions: Dimensions): UseDataView => {
 
   const channelDataToImageData = useCallback((
     channelData: number[],
+    channelRange: MinMax,
     color: string,
   ): ImageData => {
     const colorR = parseInt(color.substring(0, 2), 16);
@@ -74,9 +77,11 @@ export const useDataView = (dimensions: Dimensions): UseDataView => {
 
     const imageData = new ImageData(dimensions.width, dimensions.height);
 
-    writeChannel(channelData, imageData, 0, colorR);
-    writeChannel(channelData, imageData, 1, colorG);
-    writeChannel(channelData, imageData, 2, colorB);
+    const rangedData = applyChannelRange(channelData, channelRange);
+
+    writeChannel(rangedData, imageData, 0, colorR);
+    writeChannel(rangedData, imageData, 1, colorG);
+    writeChannel(rangedData, imageData, 2, colorB);
 
     return imageData;
   }, [dimensions, writeChannel]);

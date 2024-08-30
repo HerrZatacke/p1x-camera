@@ -6,17 +6,28 @@ import { useDataView } from '../../hooks/useDataView';
 import './index.scss';
 import useSettingsStore from '../../stores/settingsStore';
 import useScannedDataStore from '../../stores/scannedDataStore';
+import { applyChannelRange } from '../../../tools/applyChannelRange';
+import { getMinMax } from '../../../tools/minMax';
 
 function DataViewRGB() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const { activeChannels } = useSettingsStore();
-  const { data, dimensions } = useScannedDataStore();
+  const { data, ranges, dimensions } = useScannedDataStore();
 
   const channels: RGBChannels = useMemo(() => ({
-    channelR: activeChannels.r.map((channelName): number[] => data[channelName] || []),
-    channelG: activeChannels.g.map((channelName): number[] => data[channelName] || []),
-    channelB: activeChannels.b.map((channelName): number[] => data[channelName] || []),
-  }), [activeChannels, data]);
+    channelR: activeChannels.r.map((channelName): number[] => {
+      const cData = data[channelName] || [];
+      return applyChannelRange(cData, ranges[channelName] || getMinMax(cData));
+    }),
+    channelG: activeChannels.g.map((channelName): number[] => {
+      const cData = data[channelName] || [];
+      return applyChannelRange(cData, ranges[channelName] || getMinMax(cData));
+    }),
+    channelB: activeChannels.b.map((channelName): number[] => {
+      const cData = data[channelName] || [];
+      return applyChannelRange(cData, ranges[channelName] || getMinMax(cData));
+    }),
+  }), [activeChannels, data, ranges]);
 
   const { rgbChannelsDataToImageData } = useDataView(dimensions);
 

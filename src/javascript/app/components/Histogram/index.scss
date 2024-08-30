@@ -2,10 +2,12 @@
   display: inline-flex;
   padding: 4px;
   background-color: #0c1f1f;
+  position: relative;
 
   &__canvas {
     display: block;
     margin: 0;
     image-rendering: pixelated;
+    cursor: crosshair;
   }
 }

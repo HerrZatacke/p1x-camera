@@ -97,15 +97,6 @@ function Controls() {
                 className="controls__button"
                 disabled={disabled}
                 type="button"
-                onClick={clearData}
-              >
-                Clear data
-              </button>
-
-              <button
-                className="controls__button"
-                disabled={disabled}
-                type="button"
                 onClick={gotoDialog}
               >
                 GoTo
@@ -155,23 +146,32 @@ function Controls() {
               >
                 Led Off
               </button>
-
-              <button
-                className="controls__button"
-                disabled={disabled}
-                type="button"
-                onClick={downloadData}
-              >
-                Download Data
-              </button>
-
-              <input
-                type="file"
-                onChange={importData}
-              />
             </>
           )
         }
+
+        <button
+          className="controls__button"
+          disabled={disabled}
+          type="button"
+          onClick={clearData}
+        >
+          Clear data
+        </button>
+
+        <button
+          className="controls__button"
+          disabled={disabled}
+          type="button"
+          onClick={downloadData}
+        >
+          Download Data
+        </button>
+
+        <input
+          type="file"
+          onChange={importData}
+        />
 
         {
           progress.startTime > 0 && (

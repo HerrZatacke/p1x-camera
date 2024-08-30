@@ -3,6 +3,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import type { P1XChannel, P1XChannels } from '../../types/P1X';
 import { p1xChannels } from '../../types/P1X';
 import { getIndexFromCoordinates } from '../../tools/dimensions';
+import type { MinMax } from '../../tools/minMax';
 
 export interface Dimensions {
   width: number,
@@ -10,9 +11,11 @@ export interface Dimensions {
 }
 
 export type ChannelData = Partial<Record<P1XChannel, number[]>>;
+export type ChannelRange = Partial<Record<P1XChannel, MinMax>>;
 
 export interface ScannedData {
   data: ChannelData,
+  ranges: ChannelRange,
   dimensions: Dimensions,
 }
 
@@ -21,18 +24,20 @@ export interface ScannedDataState extends ScannedData {
   setAllData: (scannedData: ScannedData) => void,
   addData: (x: number, y: number, message: P1XChannels) => void,
   setDimensions: (width: number, height: number) => void,
+  setChannelRange: (channel: P1XChannel, range: MinMax) => void,
 }
 
 const useScannedDataStore = create(
   persist<ScannedDataState>(
     (set, getState) => ({
       data: {},
+      ranges: {},
       dimensions: {
         width: 0,
         height: 0,
       },
       clearData: () => {
-        set({ data: {}, dimensions: { width: 0, height: 0 } });
+        set({ data: {}, ranges: {}, dimensions: { width: 0, height: 0 } });
       },
       setAllData: (scannedData: ScannedData) => {
         set(scannedData);
@@ -59,6 +64,15 @@ const useScannedDataStore = create(
           dimensions: {
             width,
             height,
+          },
+        });
+      },
+      setChannelRange: (channel: P1XChannel, range: MinMax) => {
+        const { ranges } = getState();
+        set({
+          ranges: {
+            ...ranges,
+            [channel]: range,
           },
         });
       },
