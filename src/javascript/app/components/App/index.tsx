@@ -7,19 +7,23 @@ import DataView from '../DataView';
 import Dialogs from '../Dialogs';
 import DataViewRGB from '../DataViewRGB';
 
+import './index.scss';
+
 function App() {
   const { enabled } = useWebUSB();
 
   return (
-    <>
+    <div className="app">
       <Dialogs />
       { enabled && <Controls /> }
-      <Stack useFlexGap gap={4} direction="row" justifyContent="center">
+      <div className="app__grid">
         <DataView />
-        <DataViewRGB />
-        <Messages />
-      </Stack>
-    </>
+        <Stack direction="column" gap={2} sx={{ maxHeight: '90vh' }}>
+          <DataViewRGB />
+          <Messages />
+        </Stack>
+      </div>
+    </div>
   );
 }
 

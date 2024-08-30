@@ -2,10 +2,14 @@
   --rgb-width: 0;
   --rgb-height: 0;
 
+  --margin: 40px;
+
   display: block;
   background-color: #444;
   image-rendering: pixelated;
-  margin: 40px;
+  margin: var(--margin);
   width: calc(4 * var(--rgb-width));
   height: calc(4 * var(--rgb-height));
+
+  max-width: calc(100vw - (2 * var(--margin)));
 }

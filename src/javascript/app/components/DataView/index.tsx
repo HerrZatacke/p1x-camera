@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { Typography, Stack } from '@mui/material';
+import { Typography, Stack, Slider } from '@mui/material';
 import DataViewChannel from '../DataViewChannel';
 import useScannedDataStore from '../../stores/scannedDataStore';
 import useSettingsStore from '../../stores/settingsStore';
@@ -30,7 +30,7 @@ const channelColors: Record<P1XChannel, string> = {
 };
 
 function DataView() {
-  const { data, ranges, dimensions } = useScannedDataStore();
+  const { data, ranges, dimensions, setChannelRange } = useScannedDataStore();
 
   const channelsData = useMemo<ChannelProps[]>(() => (
     p1xChannels.reduce((acc: ChannelProps[], name): ChannelProps[] => {
@@ -57,13 +57,26 @@ function DataView() {
     <Stack useFlexGap gap={1} direction="column" className="data-view" justifyContent="flex-start" alignItems="center">
       { channelsData.map(({ name, channelData, channelRange, minMax }) => (
         <Stack useFlexGap gap={2} direction="row" key={name}>
-          <Histogram
-            name={name}
-            numBins={64}
-            barWidth={4}
-            channelData={channelData}
-            height={dimensions.height}
-          />
+          <Stack useFlexGap gap={2} direction="column">
+            <Histogram
+              name={name}
+              numBins={64}
+              barWidth={4}
+              channelData={channelData}
+              height={50}
+            />
+            <Slider
+              value={[channelRange.min, channelRange.max]}
+              min={0}
+              max={minMax.max}
+              onChange={(_, values) => {
+                setChannelRange(name, {
+                  min: (values as number[])[0],
+                  max: (values as number[])[1],
+                });
+              }}
+            />
+          </Stack>
           <DataViewChannel
             name={name}
             dimensions={dimensions}

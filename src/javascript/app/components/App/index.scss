@@ -1,0 +1,19 @@
+.app {
+  &__grid {
+    --gap: 32px;
+    --columns: 2;
+    --col-width: calc(40vw - (var(--gap) / var(--columns)));
+    display: grid;
+    margin: 0 auto;
+    gap: var(--gap);
+    grid-template-columns: repeat(var(--columns), var(--col-width));
+    width: calc((var(--columns) * var(--col-width)) + var(--gap));
+
+
+    @media (max-width: 480px) {
+      --gap: 0;
+      --columns: 1;
+      --col-width: 100vw;
+    }
+  }
+}

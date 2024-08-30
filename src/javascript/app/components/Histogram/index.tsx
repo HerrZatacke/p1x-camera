@@ -17,7 +17,7 @@ export interface Props {
 
 const getShade = (value: number, max: number, highlight: boolean): string => {
   const shade = Math.ceil(value * (255 / max)).toString(16).padStart(2, '0');
-  return `#${highlight ? 'ff' : shade}${shade}${shade}`;
+  return `#${highlight ? '80' : shade}${shade}${shade}`;
 };
 
 function Histogram({ channelData, numBins, barWidth, height, name }: Props) {

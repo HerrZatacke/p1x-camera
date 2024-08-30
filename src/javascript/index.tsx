@@ -7,7 +7,7 @@ import '../scss/index.scss';
 import WebUSBProvider from './app/components/WebUSBProvider';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const appRoot = document.getElementById('app');
+  const appRoot = document.body;
   if (!appRoot) {
     return;
   }
