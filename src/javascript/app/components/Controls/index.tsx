@@ -171,6 +171,7 @@ function Controls() {
         <input
           type="file"
           onChange={importData}
+          accept=".json"
         />
 
         {
