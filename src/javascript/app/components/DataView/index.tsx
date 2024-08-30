@@ -9,6 +9,8 @@ import type { MinMax } from '../../../tools/minMax';
 import RGBSwitch from '../RGBSwitch';
 import Histogram from '../Histogram';
 
+import './index.scss';
+
 interface ChannelProps {
   name: P1XChannel,
   channelData: number[],
@@ -57,13 +59,13 @@ function DataView() {
     <Stack useFlexGap gap={1} direction="column" className="data-view" justifyContent="flex-start" alignItems="center">
       { channelsData.map(({ name, channelData, channelRange, minMax }) => (
         <Stack useFlexGap gap={2} direction="row" key={name}>
-          <Stack useFlexGap gap={2} direction="column">
+          <Stack useFlexGap gap={2} direction="column" className="data-view__histogram">
             <Histogram
               name={name}
               numBins={64}
               barWidth={4}
               channelData={channelData}
-              height={50}
+              height={70}
             />
             <Slider
               value={[channelRange.min, channelRange.max]}
@@ -84,7 +86,7 @@ function DataView() {
             channelData={channelData}
             channelRange={channelRange}
           />
-          <Typography variant="body2">
+          <Typography variant="body2" className="data-view__label">
             { name }
             <br />
             { `${minMax.min} to ${minMax.max}` }

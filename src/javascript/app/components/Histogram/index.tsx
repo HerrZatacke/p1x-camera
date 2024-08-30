@@ -22,7 +22,7 @@ const getShade = (value: number, max: number, highlight: boolean): string => {
 
 function Histogram({ channelData, numBins, barWidth, height, name }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { ranges, setChannelRange } = useScannedDataStore();
+  const { ranges } = useScannedDataStore();
   const { min, max } = useMemo<MinMax>(() => getMinMax(channelData), [channelData]);
 
   const channelRange: MinMax = ranges[name] || { min, max };
@@ -74,21 +74,6 @@ function Histogram({ channelData, numBins, barWidth, height, name }: Props) {
         width={width}
         height={height}
         ref={canvasRef}
-        onClick={(ev) => {
-          const val = Math.floor(max * (ev.nativeEvent.offsetX / width));
-          setChannelRange(name, {
-            ...channelRange,
-            min: val,
-          });
-        }}
-        onContextMenu={(ev) => {
-          const val = Math.ceil(max * (ev.nativeEvent.offsetX / width));
-          ev.preventDefault();
-          setChannelRange(name, {
-            ...channelRange,
-            max: val,
-          });
-        }}
       />
     </div>
   );

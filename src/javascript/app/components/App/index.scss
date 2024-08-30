@@ -10,7 +10,7 @@
     width: calc((var(--columns) * var(--col-width)) + var(--gap));
 
 
-    @media (max-width: 480px) {
+    @media (max-width: $breakpoint) {
       --gap: 0;
       --columns: 1;
       --col-width: 100vw;

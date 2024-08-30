@@ -1,0 +1,11 @@
+.data-view {
+  &__histogram {
+    max-width: 40vw;
+  }
+
+  @media (max-width: $breakpoint) {
+    &__label {
+      display: none;
+    }
+  }
+}
