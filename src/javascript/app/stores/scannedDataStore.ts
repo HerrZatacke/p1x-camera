@@ -27,20 +27,27 @@ export interface ScannedDataState extends ScannedData {
   setChannelRange: (channel: P1XChannel, range: MinMax) => void,
 }
 
+const defaults: ScannedData = {
+  data: {},
+  ranges: {},
+  dimensions: {
+    width: 0,
+    height: 0,
+  },
+};
+
 const useScannedDataStore = create(
   persist<ScannedDataState>(
     (set, getState) => ({
-      data: {},
-      ranges: {},
-      dimensions: {
-        width: 0,
-        height: 0,
-      },
+      ...defaults,
       clearData: () => {
         set({ data: {}, ranges: {}, dimensions: { width: 0, height: 0 } });
       },
       setAllData: (scannedData: ScannedData) => {
-        set(scannedData);
+        set({
+          ...defaults,
+          ...scannedData,
+        });
       },
       addData: (x: number, y: number, message: P1XChannels) => {
         const { data, dimensions } = getState();

@@ -156,6 +156,8 @@ export const useControls = (): UseControls => {
         setAllData(fileContent);
       }
     }
+
+    target.value = '';
   };
 
   return {
